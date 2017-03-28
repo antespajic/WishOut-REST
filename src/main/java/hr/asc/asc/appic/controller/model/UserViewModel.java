@@ -1,30 +1,27 @@
-package hr.asc.appic.persistence.model;
+package hr.asc.asc.appic.controller.model;
 
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+/**
+ * This class is a model used for transferring data to view
+ * 
+ * @author antes
+ *
+ */
 @Getter
 @Setter
-@Accessors(chain=true)
-@Document
 @NoArgsConstructor
-public class User {
-	
-	@Id
-	@Setter(value=AccessLevel.NONE)
-	private BigInteger id;
-	
+@Accessors(chain=true)
+public class UserViewModel {
+
 	private String email;
 	private String password;
 	private String name;
@@ -41,5 +38,4 @@ public class User {
 	private Long coins;
 
 	private Set<BigInteger> upvotes = new HashSet<>();
-	
 }

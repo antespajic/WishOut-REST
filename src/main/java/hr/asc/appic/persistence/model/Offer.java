@@ -1,8 +1,6 @@
 package hr.asc.appic.persistence.model;
 
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
