@@ -1,4 +1,4 @@
-package hr.asc.appic.Config;
+package hr.asc.appic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
