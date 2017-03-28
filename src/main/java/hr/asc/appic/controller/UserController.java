@@ -1,4 +1,4 @@
-package hr.asc.asc.appic.controller;
+package hr.asc.appic.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

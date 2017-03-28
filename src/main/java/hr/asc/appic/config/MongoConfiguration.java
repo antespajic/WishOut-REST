@@ -1,4 +1,4 @@
-package hr.asc.appic.Config;
+package hr.asc.appic.config;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
