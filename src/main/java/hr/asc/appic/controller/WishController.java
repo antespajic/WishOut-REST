@@ -1,7 +1,10 @@
 package hr.asc.appic.controller;
 
 import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.service.WishService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -11,11 +14,14 @@ import java.math.BigInteger;
 @RequestMapping("/wish")
 public class WishController {
 
+    @Autowired
+    private WishService wishService;
+
     @RequestMapping(
             value = "/{id}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DeferredResult<WishModel> getWish(@PathVariable("id") BigInteger id) {
+    public DeferredResult<ResponseEntity> getWish(@PathVariable("id") BigInteger id) {
 
         return null;
     }
@@ -24,14 +30,12 @@ public class WishController {
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DeferredResult<WishModel> createWish(@RequestBody WishModel model) {
-
-        return null;
+    public DeferredResult<ResponseEntity> createWish(@RequestBody WishModel model) {
+        return wishService.createWish(model);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public DeferredResult deleteWish(@PathVariable("id") BigInteger id) {
-
-        return null;
+        return wishService.deleteWish(id);
     }
 }

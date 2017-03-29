@@ -42,4 +42,26 @@ public class WishMapper implements Mapper<Wish, WishModel> {
 
         return model;
     }
+
+    public void updatePojoFromModel(Wish wish, WishModel model) {
+
+        if (model.getTitle() != null) {
+            wish.setTitle(model.getTitle());
+        }
+        if (model.getDescription() != null) {
+            wish.setDescription(model.getDescription());
+        }
+        if (model.getCategories() != null) {
+            wish.setCategories(model.getCategories());
+        }
+        if (model.getState() != null) {
+            wish.setState(model.getState());
+        }
+        if (model.getUpvoteCount() != null) {
+            wish.setUpvoteCount(model.getUpvoteCount());
+        }
+        if (model.getReportCount() != null) {
+            wish.setReportCount(model.getReportCount());
+        }
+    }
 }

@@ -40,6 +40,7 @@ public class User {
     private Long coins;
 
     private Set<BigInteger> upvotes = new HashSet<>();
+    private Set<BigInteger> reports = new HashSet<>();
 
     private Set<Wish> wishes = new HashSet<>();
     private Set<Offer> offers = new HashSet<>();
