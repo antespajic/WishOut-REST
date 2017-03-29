@@ -10,9 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Document
 @Getter
@@ -20,7 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Wish implements IPost {
+public class Wish {
 
     @Id
     private BigInteger id;
@@ -28,11 +26,12 @@ public class Wish implements IPost {
     private User user;
     private String title;
     private String description;
-    private List<String> categories;
-    private Set<String> pictures;
+    private List<String> categories = new LinkedList<>();
+    private Set<String> pictures = new HashSet<>();
     private Date created;
     @DBRef
     private Offer offer;
+    private Set<Offer> offers = new HashSet<>();
     private Integer state;
     private Long upvoteCount;
     private Long reportCount;

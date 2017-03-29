@@ -15,7 +15,7 @@ import java.math.BigInteger;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Offer implements IPost {
+public class Offer {
 
     @Id
     private BigInteger id;
