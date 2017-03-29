@@ -11,9 +11,6 @@ public class StoryMapper implements Mapper<Story, StoryViewModel> {
 	public Story modelToPojo(StoryViewModel model) {
 		Story s = new Story();
 		s.setCreated(model.getCreated() == null ? new Date() : model.getCreated())
-			.setCreator(null)
-			.setWish(null)
-			.setSponsor(null)
 			.setDescription(model.getDescription())
 			.setPictures(model.getPictures())
 			.setReportCount(model.getReportCount());
