@@ -1,7 +1,7 @@
 package hr.asc.appic.mapping;
 
+import hr.asc.appic.controller.model.UserViewModel;
 import hr.asc.appic.persistence.model.User;
-import hr.asc.asc.appic.controller.model.UserViewModel;
 
 public class UserMapper implements Mapper<User, UserViewModel> {
 

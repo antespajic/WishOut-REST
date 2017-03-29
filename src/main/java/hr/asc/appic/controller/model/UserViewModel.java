@@ -1,4 +1,4 @@
-package hr.asc.asc.appic.controller.model;
+package hr.asc.appic.controller.model;
 
 import java.math.BigInteger;
 import java.util.Date;

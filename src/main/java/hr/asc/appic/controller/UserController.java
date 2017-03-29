@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import hr.asc.asc.appic.controller.model.UserViewModel;
-import hr.asc.asc.appic.service.UserService;
+import hr.asc.appic.controller.model.UserViewModel;
+import hr.asc.appic.service.UserService;
 
-@RestController(value="/user")
+@RestController
+@RequestMapping(value="/user")
 public class UserController {
 
 	@Autowired

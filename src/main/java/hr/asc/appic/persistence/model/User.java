@@ -21,8 +21,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class User {
 	
-	@Id
-	@Setter(value=AccessLevel.NONE)
+	@Id	@Setter(value=AccessLevel.NONE)
 	private BigInteger id;
 	
 	private String email;
