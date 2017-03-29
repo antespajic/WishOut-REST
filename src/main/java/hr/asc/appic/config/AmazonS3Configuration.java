@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
-public class AmazonS3Config {
+public class AmazonS3Configuration {
 
     @Value("${aws-bucket-image}")
     private String bucket;

@@ -41,5 +41,4 @@ public class User {
 	private Long coins;
 
 	private Set<BigInteger> upvotes = new HashSet<>();
-	
 }

@@ -8,7 +8,7 @@ import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.config.HttpClientConfig;
 
 @Configuration
-public class ElasticSearchConfig {
+public class ElasticSearchConfiguration {
 
 	@Bean
 	public JestClient jestClient() {
