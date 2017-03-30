@@ -6,8 +6,6 @@ import hr.asc.appic.persistence.model.Wish;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ImagePaths {
 
@@ -23,38 +21,19 @@ public class ImagePaths {
     private static final String storyDir = "story/";
     private static final String accessRoot = region + "." + url + "/" + bucket + "/";
 
-    public static String accessUrl(User u) {
-        return accessRoot + u.getProfilePicture();
-    }
-
-    public static String destinationUrl(User u) {
+    public static String uploadUrl(User u) {
         return userDir + u.getId() + "_" + new Date().getTime();
     }
 
-    public static List<String> accessUrls(Wish wish) {
-        return accessUrlsFromList(wish.getPictures());
-    }
-
-    public static String destinationUrls(Wish wish) {
+    public static String uploadUrl(Wish wish) {
         return wishDir + wish.getId() + "_" + new Date().getTime();
     }
 
-    public static List<String> accessUrls(Story story) {
-        return accessUrlsFromList(story.getPictures());
-    }
-
-    public static String destinationUrls(Story story) {
+    public static String uploadUrl(Story story) {
         return storyDir + story.getId() + "_" + new Date().getTime();
     }
 
-    public static String accessUrlFromDestinationUrl(String url) {
-        return url.substring(accessRoot.length());
-    }
-
-    private static List<String> accessUrlsFromList(List<String> paths) {
-        return paths
-                .stream()
-                .map(p -> accessRoot + p)
-                .collect(Collectors.toList());
+    public static String accessUrl(String destinationUrl) {
+        return accessRoot + destinationUrl;
     }
 }

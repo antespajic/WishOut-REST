@@ -41,9 +41,14 @@ public class ImageController {
         return imageService.setUserPhoto(id, image);
     }
 
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteUserPhoto() {
-
-        return null;
+    @RequestMapping(
+            value = "/user/{id}/{imageName}",
+            method = RequestMethod.DELETE
+    )
+    public DeferredResult<ResponseEntity> deleteUserPhoto(
+            @PathVariable("id") BigInteger id,
+            @PathVariable("imageName") String imageName) {
+        return imageService.deleteUserPhoto(id, imageName);
     }
 
     // ==================== WISH ==================== //
@@ -69,9 +74,15 @@ public class ImageController {
         return imageService.addWishPhoto(id, image);
     }
 
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto() {
-
-        return null;
+    @RequestMapping(
+            value = "/wish/{id}/{imageName}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(
+            @PathVariable("id") BigInteger id,
+            @PathVariable("imageName") String imageName) {
+        return imageService.deleteWishPhoto(id, imageName);
     }
 
     // ==================== STORY ==================== //
@@ -97,8 +108,14 @@ public class ImageController {
         return imageService.addStoryPhoto(id, image);
     }
 
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto() {
-
-        return null;
+    @RequestMapping(
+            value = "/story/{id}/{imageName}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(
+            @PathVariable("id") BigInteger id,
+            @PathVariable("imageName") String imageName) {
+        return imageService.deleteStoryPhoto(id, imageName);
     }
 }

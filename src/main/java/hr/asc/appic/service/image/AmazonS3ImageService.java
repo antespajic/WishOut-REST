@@ -41,7 +41,7 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrl(u))));
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
                 },
                 e -> {
                     // TODO
@@ -58,10 +58,12 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    String imagePath = ImagePaths.destinationUrl(u);
+                    String imagePath = ImagePaths.uploadUrl(u);
                     uploadImage(imagePath, image);
-                    u.setProfilePicture(imagePath);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrl(u))));
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    u.setProfilePicture(fullImagePath);
+                    repoProvider.userRepository.save(u);
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
                 },
                 e -> {
                     // TODO
@@ -72,14 +74,16 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity> deleteUserPhoto(BigInteger id) {
+    public DeferredResult<ResponseEntity> deleteUserPhoto(BigInteger id, String imagePath) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    deleteImage(u.getProfilePicture());
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    deleteImage(fullImagePath);
                     u.setProfilePicture(null);
+                    repoProvider.userRepository.save(u);
                     result.setResult(ResponseEntity.ok().build());
                 },
                 e -> {
@@ -97,7 +101,7 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(w))));
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
                 },
                 e -> {
                     // TODO
@@ -114,10 +118,12 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    String imagePath = ImagePaths.destinationUrls(w);
+                    String imagePath = ImagePaths.uploadUrl(w);
                     uploadImage(imagePath, image);
-                    w.getPictures().add(imagePath);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(w))));
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    w.getPictures().add(fullImagePath);
+                    repoProvider.wishRepository.save(w);
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
                 },
                 e -> {
                     // TODO
@@ -134,15 +140,17 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    String path = ImagePaths.accessUrlFromDestinationUrl(imagePath);
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
 
-                    if (w.getPictures().contains(path)) {
-                        w.getPictures().remove(path);
-                        deleteImage(path);
-                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(w))));
+                    if (w.getPictures().contains(fullImagePath)) {
+                        w.getPictures().remove(fullImagePath);
+                        deleteImage(imagePath);
+                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
                     } else {
                         result.setResult(ResponseEntity.badRequest().build());
                     }
+
+                    repoProvider.wishRepository.save(w);
                 },
                 e -> {
                     // TODO
@@ -159,7 +167,7 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(s))));
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
                 },
                 e -> {
                     // TODO
@@ -176,10 +184,12 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    String imagePath = ImagePaths.destinationUrls(s);
+                    String imagePath = ImagePaths.uploadUrl(s);
                     uploadImage(imagePath, image);
-                    s.getPictures().add(imagePath);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(s))));
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    s.getPictures().add(fullImagePath);
+                    repoProvider.storyRepository.save(s);
+                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
                 },
                 e -> {
                     // TODO
@@ -196,15 +206,17 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    String path = ImagePaths.accessUrlFromDestinationUrl(imagePath);
+                    String fullImagePath = ImagePaths.accessUrl(imagePath);
 
-                    if (s.getPictures().contains(path)) {
-                        s.getPictures().remove(path);
-                        deleteImage(path);
-                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, ImagePaths.accessUrls(s))));
+                    if (s.getPictures().contains(fullImagePath)) {
+                        s.getPictures().remove(fullImagePath);
+                        deleteImage(imagePath);
+                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
                     } else {
                         result.setResult(ResponseEntity.badRequest().build());
                     }
+
+                    repoProvider.storyRepository.save(s);
                 },
                 e -> {
                     // TODO
