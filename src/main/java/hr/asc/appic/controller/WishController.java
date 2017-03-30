@@ -21,7 +21,9 @@ public class WishController {
             value = "/{id}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity> getWish(@PathVariable("id") BigInteger id) {
+    public DeferredResult<ResponseEntity> getWish(@PathVariable("id") BigInteger id,
+                                                  @RequestParam("lower") Long lower,
+                                                  @RequestParam(value = "upper") Long upper) {
 
         return null;
     }
@@ -32,6 +34,15 @@ public class WishController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity> createWish(@RequestBody WishModel model) {
         return wishService.createWish(model);
+    }
+
+    @RequestMapping(
+            value = "/{id}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity> updateWish(@PathVariable("id") BigInteger id,
+                                                     @RequestBody WishModel model) {
+        return wishService.updateWish(id, model);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)

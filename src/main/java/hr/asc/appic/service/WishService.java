@@ -71,12 +71,13 @@ public class WishService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> updateWish(WishModel model) {
+    public DeferredResult<ResponseEntity> updateWish(BigInteger id, WishModel model) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<WishModel> updateWishJob = listeningExecutorService.submit(
                 () -> {
-                    Wish wish = repoProvider.wishRepository.findById(model.getId()).get();
+                    Wish wish = repoProvider.wishRepository.findById(id).get();
+                    ContentCheck.requireNonNull(id, wish);
                     mapper.updatePojoFromModel(wish, model);
 
                     if (model.getOfferId() != null) {
