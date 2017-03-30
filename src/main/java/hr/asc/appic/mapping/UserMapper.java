@@ -1,7 +1,7 @@
 package hr.asc.appic.mapping;
 
+import hr.asc.appic.controller.model.UserViewModel;
 import hr.asc.appic.persistence.model.User;
-import hr.asc.asc.appic.controller.model.UserViewModel;
 
 public class UserMapper implements Mapper<User, UserViewModel> {
 
@@ -18,7 +18,7 @@ public class UserMapper implements Mapper<User, UserViewModel> {
 			.setProfilePicture(model.getProfilePicture())
 			.setDateOfBirth(model.getDateOfBirth())
 			.setDateOfRegistration(model.getDateOfRegistration())
-			.setProfileConfirmed(model.isProfileConfirmed())
+			.setProfileConfirmed(model.getProfileConfirmed())
 			.setGender(model.getGender())
 			.setCoins(model.getCoins())
 			.setPassword(model.getPassword());

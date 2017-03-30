@@ -1,4 +1,4 @@
-package hr.asc.asc.appic.controller.model;
+package hr.asc.appic.controller.model;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -34,7 +34,7 @@ public class UserViewModel {
 	private String profilePicture;
 	private String contactNumber;
 	private String contactFacebook;
-	private boolean profileConfirmed;
+	private Boolean profileConfirmed;
 	private Long coins;
 
 	private Set<BigInteger> upvotes = new HashSet<>();
