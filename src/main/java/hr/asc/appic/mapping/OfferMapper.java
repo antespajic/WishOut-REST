@@ -14,6 +14,7 @@ public class OfferMapper implements Mapper<Offer, OfferModel> {
                 .setUserId(model.getUserId())
                 .setWishId(model.getWishId())
                 .setDescription(model.getDescription())
+                .setCreated(model.getCreated())
                 .setUpvoteCount(model.getUpvoteCount())
                 .setReportCount(model.getReportCount());
         return offer;
@@ -26,6 +27,7 @@ public class OfferMapper implements Mapper<Offer, OfferModel> {
                 .setUserId(offer.getUserId())
                 .setWishId(offer.getWishId())
                 .setDescription(offer.getDescription())
+                .setCreated(offer.getCreated())
                 .setUpvoteCount(offer.getUpvoteCount())
                 .setReportCount(offer.getReportCount());
         return model;

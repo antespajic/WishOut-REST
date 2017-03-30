@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
+import java.util.Date;
 
 @Document
 @Getter
@@ -23,6 +24,7 @@ public class Offer {
     private BigInteger userId;
     private BigInteger wishId;
     private String description;
+    private Date created;
     private Long upvoteCount;
     private Long reportCount;
 }
