@@ -1,6 +1,7 @@
 package hr.asc.appic.service;
 
-import java.math.BigInteger;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import hr.asc.appic.controller.model.OfferModel;
+import hr.asc.appic.controller.model.StoryViewModel;
 import hr.asc.appic.controller.model.UserViewModel;
-import hr.asc.appic.mapping.Mapper;
+import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.mapping.OfferMapper;
+import hr.asc.appic.mapping.StoryMapper;
 import hr.asc.appic.mapping.UserMapper;
+import hr.asc.appic.mapping.WishMapper;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +36,10 @@ public class UserService {
 	@Autowired
 	private ListeningExecutorService listeningExecutorService;
 	
-	private Mapper<User, UserViewModel> map = new UserMapper();
+	@Autowired private UserMapper map;
+	@Autowired private WishMapper wishMapper;
+	@Autowired private StoryMapper storyMapper;
+	@Autowired private OfferMapper offerMapper;
 
 	public DeferredResult<ResponseEntity<UserViewModel>> create(UserViewModel viewModel) {
 		DeferredResult<ResponseEntity<UserViewModel>> res = new DeferredResult<>();
@@ -44,9 +53,9 @@ public class UserService {
 		return res;
 	}
 
-	public DeferredResult<ResponseEntity<UserViewModel>> get(Long id) {
+	public DeferredResult<ResponseEntity<UserViewModel>> get(String id) {
 		DeferredResult<ResponseEntity<UserViewModel>> res = new DeferredResult<>();
-		userRepository.findById(BigInteger.valueOf(id)).addCallback(
+		userRepository.findById(id).addCallback(
 				response -> {
 					Assert.notNull(response, "Couldn't find a user with provided ID");
 					res.setResult(ResponseEntity.status(HttpStatus.OK).body(map.pojoToModel(response)));
@@ -58,13 +67,13 @@ public class UserService {
 		return res;
 	}
 
-	public DeferredResult<ResponseEntity<?>> update(Long id, UserViewModel viewModel) {
+	public DeferredResult<ResponseEntity<?>> update(String id, UserViewModel viewModel) {
 		DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
 
 		com.google.common.util.concurrent.ListenableFuture<ResponseEntity<?>>
 		getUser = listeningExecutorService.submit(
 				() -> {
-					User user = userRepository.findById(BigInteger.valueOf(id)).get();
+					User user = userRepository.findById(id).get();
 					Assert.notNull(user, "Couldn't find user with ID " + id);
 					
 					updateUserPartial(user, viewModel);
@@ -91,9 +100,9 @@ public class UserService {
 		return res;
 	}
 
-	public DeferredResult<ResponseEntity<?>> delete(Long id) {
+	public DeferredResult<ResponseEntity<?>> delete(String id) {
 		DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
-		userRepository.delete(BigInteger.valueOf(id))
+		userRepository.delete(id)
 				.addCallback(
 						response -> res.setResult(ResponseEntity.ok().build()),
 						error -> {
@@ -103,6 +112,63 @@ public class UserService {
 		return res;
 	}
 
+	public DeferredResult<ResponseEntity<Collection<WishModel>>> getWishes(String id) {
+		DeferredResult<ResponseEntity<Collection<WishModel>>> res = new DeferredResult<>();
+		userRepository.findById(id).addCallback(
+				response -> {
+					Assert.notNull(response, "Couldn't find a user with provided ID");
+					res.setResult(ResponseEntity.status(HttpStatus.OK).body(
+							response.getWishes().stream()
+								.map(wishMapper::pojoToModel)
+								.collect(Collectors.toList()))
+							);
+				},
+				e -> {
+					res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+					log.error("Error while getting user", e);	
+				});
+		
+		return res;
+	}
+
+	public DeferredResult<ResponseEntity<Collection<StoryViewModel>>> getStories(String id) {
+		DeferredResult<ResponseEntity<Collection<StoryViewModel>>> res = new DeferredResult<>();
+		userRepository.findById(id).addCallback(
+				response -> {
+					Assert.notNull(response, "Couldn't find a user with provided ID");
+					res.setResult(ResponseEntity.status(HttpStatus.OK).body(
+							response.getStories().stream()
+								.map(storyMapper::pojoToModel)
+								.collect(Collectors.toList()))
+							);
+				},
+				e -> {
+					res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+					log.error("Error while getting user", e);	
+				});
+		
+		return res;
+	}
+
+	public DeferredResult<ResponseEntity<Collection<OfferModel>>> getOffers(String id) {
+		DeferredResult<ResponseEntity<Collection<OfferModel>>> res = new DeferredResult<>();
+		userRepository.findById(id).addCallback(
+				response -> {
+					Assert.notNull(response, "Couldn't find a user with provided ID");
+					res.setResult(ResponseEntity.status(HttpStatus.OK).body(
+							response.getOffers().stream()
+								.map(offerMapper::pojoToModel)
+								.collect(Collectors.toList()))
+							);
+				},
+				e -> {
+					res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+					log.error("Error while getting user", e);	
+				});
+		
+		return res;
+	}
+	
 	private void updateUserPartial(User user, UserViewModel viewModel) {
 		if (viewModel.getName() != null) {
 			user.setName(viewModel.getName());

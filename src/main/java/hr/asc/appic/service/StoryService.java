@@ -1,7 +1,5 @@
 package hr.asc.appic.service;
 
-import java.math.BigInteger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +12,11 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryViewModel;
-import hr.asc.appic.mapping.Mapper;
+import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.mapping.StoryMapper;
+import hr.asc.appic.mapping.UserMapper;
 import hr.asc.appic.persistence.model.Story;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.model.Wish;
@@ -38,7 +38,8 @@ public class StoryService {
 	@Autowired
 	private ListeningExecutorService listeningExecutorService;
 	
-	private Mapper<Story, StoryViewModel> map = new StoryMapper();
+	@Autowired private StoryMapper map;
+	@Autowired private UserMapper userMapper;
 	
 	public DeferredResult<ResponseEntity<StoryViewModel>> create(StoryViewModel svm) {
 		DeferredResult<ResponseEntity<StoryViewModel>> res = new DeferredResult<>();
@@ -78,16 +79,30 @@ public class StoryService {
 		return res;
 	}
 	
-	public DeferredResult<ResponseEntity<StoryViewModel>> get(Long id) {
-		DeferredResult<ResponseEntity<StoryViewModel>> res = new DeferredResult<>();
-		storyRepository.findById(BigInteger.valueOf(id)).addCallback(
+	public DeferredResult<ResponseEntity<StoryExportModel>> get(String id) {
+		DeferredResult<ResponseEntity<StoryExportModel>> res = new DeferredResult<>();
+		storyRepository.findById(id).addCallback(
 				response -> {
 					Assert.notNull(response, "Couldn't find a story with provided id " + id);
-					res.setResult(ResponseEntity.ok(map.pojoToModel(response)));
+					UserLightViewModel creator = userMapper.lightModelFromUser(response.getCreator());
+					UserLightViewModel sponsor = userMapper.lightModelFromUser(response.getSponsor());
+					StoryViewModel story = map.pojoToModel(response);
+					res.setResult(ResponseEntity.ok(map.pojoToExportModel(story, creator, sponsor)));
 				},
 				error -> {
 					res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
 					log.error("Error while getting story", error);
+				});
+		return res;
+	}
+
+	public DeferredResult<ResponseEntity<?>> delete(String id) {
+		DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
+		storyRepository.delete(id).addCallback(
+				response -> res.setResult(ResponseEntity.ok().build()),
+				error -> {
+					res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+					log.error("Error deleting story", error);
 				});
 		return res;
 	}

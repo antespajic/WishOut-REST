@@ -4,36 +4,37 @@ import hr.asc.appic.persistence.model.Story;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.model.Wish;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+@Service
 public class ImagePaths {
 
     @Value("${aws-region}")
-    private static String region;
+    private String region;
     @Value("${aws-url}")
-    private static String url;
+    private String url;
     @Value("${aws-bucket-image}")
-    private static String bucket;
+    private String bucket;
 
-    private static final String userDir = "user/";
-    private static final String wishDir = "wish/";
-    private static final String storyDir = "story/";
-    private static final String accessRoot = region + "." + url + "/" + bucket + "/";
+    private String userDir = "user/";
+    private String wishDir = "wish/";
+    private String storyDir = "story/";
 
-    public static String uploadUrl(User u) {
+    public String uploadUrl(User u) {
         return userDir + u.getId() + "_" + new Date().getTime();
     }
 
-    public static String uploadUrl(Wish wish) {
+    public String uploadUrl(Wish wish) {
         return wishDir + wish.getId() + "_" + new Date().getTime();
     }
 
-    public static String uploadUrl(Story story) {
+    public String uploadUrl(Story story) {
         return storyDir + story.getId() + "_" + new Date().getTime();
     }
 
-    public static String accessUrl(String destinationUrl) {
-        return accessRoot + destinationUrl;
+    public String accessUrl(String destinationUrl) {
+        return region + "." + url + "/" + bucket + "/" + destinationUrl;
     }
 }

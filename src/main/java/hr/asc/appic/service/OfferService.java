@@ -1,20 +1,20 @@
 package hr.asc.appic.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import hr.asc.appic.controller.model.OfferModel;
 import hr.asc.appic.exception.ContentCheck;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.model.Wish;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import java.math.BigInteger;
 
 @Service
 public class OfferService {
@@ -26,7 +26,7 @@ public class OfferService {
     @Autowired
     private OfferMapper mapper;
 
-    public DeferredResult<ResponseEntity> getOffer(BigInteger id) {
+    public DeferredResult<ResponseEntity> getOffer(String id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<OfferModel> getOffer = listeningExecutorService.submit(
@@ -71,7 +71,7 @@ public class OfferService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> deleteOffer(BigInteger id) {
+    public DeferredResult<ResponseEntity> deleteOffer(String id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<Void> deleteOfferJob = listeningExecutorService.submit(

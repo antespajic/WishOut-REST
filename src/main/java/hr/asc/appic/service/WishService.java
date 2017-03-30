@@ -1,15 +1,7 @@
 package hr.asc.appic.service;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import hr.asc.appic.controller.model.*;
-import hr.asc.appic.exception.ContentCheck;
-import hr.asc.appic.mapping.OfferMapper;
-import hr.asc.appic.mapping.WishMapper;
-import hr.asc.appic.persistence.model.Offer;
-import hr.asc.appic.persistence.model.User;
-import hr.asc.appic.persistence.model.Wish;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +10,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.math.BigInteger;
-import java.util.List;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+
+import hr.asc.appic.controller.model.OfferExportModel;
+import hr.asc.appic.controller.model.WishExportModel;
+import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.exception.ContentCheck;
+import hr.asc.appic.mapping.OfferMapper;
+import hr.asc.appic.mapping.UserMapper;
+import hr.asc.appic.mapping.WishMapper;
+import hr.asc.appic.persistence.model.Offer;
+import hr.asc.appic.persistence.model.User;
+import hr.asc.appic.persistence.model.Wish;
 
 @Service
 public class WishService {
@@ -34,8 +38,11 @@ public class WishService {
     private WishMapper wishMapper;
     @Autowired
     private OfferMapper offerMapper;
+    
+    @Autowired private UserMapper userMapper;
+    
 
-    public DeferredResult<ResponseEntity> getWish(Integer index, Integer size, BigInteger id) {
+    public DeferredResult<ResponseEntity> getWish(Integer index, Integer size, String id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<WishExportModel> getWishJob = listeningExecutorService.submit(
@@ -79,7 +86,7 @@ public class WishService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> updateWish(BigInteger id, WishModel model) {
+    public DeferredResult<ResponseEntity> updateWish(String id, WishModel model) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<WishModel> updateWishJob = listeningExecutorService.submit(
@@ -102,7 +109,7 @@ public class WishService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> deleteWish(BigInteger id) {
+    public DeferredResult<ResponseEntity> deleteWish(String id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<Void> deleteWishJob = listeningExecutorService.submit(
@@ -123,17 +130,17 @@ public class WishService {
         User creator = repoProvider.userRepository.findById(wish.getUser().getId()).get();
 
         WishExportModel wishExportModel = new WishExportModel();
-        wishExportModel.setCreator(lightModelFromUser(creator));
+        wishExportModel.setCreator(userMapper.lightModelFromUser(creator));
         wishExportModel.setWish(wishMapper.pojoToModel(wish));
-        wishExportModel.setInteraction(interactionModelForUser(creator, wish.getId()));
+        wishExportModel.setInteraction(userMapper.interactionModelForUser(creator, wish.getId()));
 
         for (Offer offer : offers) {
             User user = repoProvider.userRepository.findById(offer.getUserId()).get();
 
             OfferExportModel offerExportModel = new OfferExportModel();
             offerExportModel.setOffer(offerMapper.pojoToModel(offer));
-            offerExportModel.setUser(lightModelFromUser(user));
-            offerExportModel.setInteraction(interactionModelForUser(user, offer.getId()));
+            offerExportModel.setUser(userMapper.lightModelFromUser(user));
+            offerExportModel.setInteraction(userMapper.interactionModelForUser(user, offer.getId()));
 
             wishExportModel.getOffers().add(offerExportModel);
         }
@@ -141,19 +148,4 @@ public class WishService {
         return wishExportModel;
     }
 
-    private UserLightViewModel lightModelFromUser(User user) {
-        UserLightViewModel model = new UserLightViewModel();
-        model.setId(user.getId());
-        model.setFirstName(user.getName());
-        model.setLastName(user.getSurname());
-        model.setProfilePicture(user.getProfilePicture());
-        return model;
-    }
-
-    private InteractionModel interactionModelForUser(User user, BigInteger resource) {
-        InteractionModel model = new InteractionModel();
-        model.setUpvoted(user.getUpvotes().contains(resource));
-        model.setReported(user.getReports().contains(resource));
-        return model;
-    }
 }

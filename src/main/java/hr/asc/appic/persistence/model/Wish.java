@@ -1,16 +1,20 @@
 package hr.asc.appic.persistence.model;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.math.BigInteger;
-import java.util.*;
 
 @Document
 @Getter
@@ -21,7 +25,7 @@ import java.util.*;
 public class Wish {
 
     @Id
-    private BigInteger id;
+    private String id;
     @DBRef
     private User user;
     private String title;
@@ -33,6 +37,6 @@ public class Wish {
     private Offer offer;
     private Set<Offer> offers = new HashSet<>();
     private Integer state;
-    private Long upvoteCount;
-    private Long reportCount;
+    private String upvoteCount;
+    private String reportCount;
 }

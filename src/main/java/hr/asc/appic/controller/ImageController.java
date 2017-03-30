@@ -1,15 +1,18 @@
 package hr.asc.appic.controller;
 
-import hr.asc.appic.controller.model.ImagePathModel;
-import hr.asc.appic.service.image.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigInteger;
+import hr.asc.appic.controller.model.ImagePathModel;
+import hr.asc.appic.service.image.ImageService;
 
 @RestController
 @RequestMapping("/image")
@@ -26,7 +29,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(
-            @PathVariable("id") BigInteger id) {
+            @PathVariable("id") String id) {
         return imageService.getUserPhoto(id);
     }
 
@@ -36,7 +39,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @RequestParam("image") MultipartFile image) {
         return imageService.setUserPhoto(id, image);
     }
@@ -46,7 +49,7 @@ public class ImageController {
             method = RequestMethod.DELETE
     )
     public DeferredResult<ResponseEntity> deleteUserPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @PathVariable("imageName") String imageName) {
         return imageService.deleteUserPhoto(id, imageName);
     }
@@ -59,7 +62,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(
-            @PathVariable("id") BigInteger id) {
+            @PathVariable("id") String id) {
         return imageService.getWishPhotos(id);
     }
 
@@ -69,7 +72,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> addWishPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @RequestParam("image") MultipartFile image) {
         return imageService.addWishPhoto(id, image);
     }
@@ -80,7 +83,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @PathVariable("imageName") String imageName) {
         return imageService.deleteWishPhoto(id, imageName);
     }
@@ -93,7 +96,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> getStoryPhotos(
-            @PathVariable("id") BigInteger id) {
+            @PathVariable("id") String id) {
         return imageService.getStoryPhotos(id);
     }
 
@@ -103,7 +106,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> addStoryPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @RequestParam("image") MultipartFile image) {
         return imageService.addStoryPhoto(id, image);
     }
@@ -114,7 +117,7 @@ public class ImageController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(
-            @PathVariable("id") BigInteger id,
+            @PathVariable("id") String id,
             @PathVariable("imageName") String imageName) {
         return imageService.deleteStoryPhoto(id, imageName);
     }

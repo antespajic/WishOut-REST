@@ -9,10 +9,10 @@ import lombok.experimental.Accessors;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class UserLightViewModel {
+public class StoryExportModel {
 
-    private String id;
-    private String firstName;
-    private String lastName;
-    private String profilePicture;
+	private StoryViewModel story;
+	private UserLightViewModel creator;
+	private UserLightViewModel sponsor;
+	
 }

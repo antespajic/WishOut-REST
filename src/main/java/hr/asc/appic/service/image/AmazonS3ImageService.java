@@ -1,16 +1,9 @@
 package hr.asc.appic.service.image;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import hr.asc.appic.controller.model.ImagePathModel;
-import hr.asc.appic.exception.ContentCheck;
-import hr.asc.appic.exception.ImageUploadException;
-import hr.asc.appic.service.RepoProvider;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +11,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
+import hr.asc.appic.controller.model.ImagePathModel;
+import hr.asc.appic.exception.ContentCheck;
+import hr.asc.appic.exception.ImageUploadException;
+import hr.asc.appic.service.RepoProvider;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -34,8 +35,10 @@ public class AmazonS3ImageService implements ImageService {
     @Autowired
     private RepoProvider repoProvider;
 
+    @Autowired private ImagePaths imagePaths;
+    
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(BigInteger id) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.userRepository.findById(id).addCallback(
@@ -52,15 +55,15 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(BigInteger id, MultipartFile image) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    String imagePath = ImagePaths.uploadUrl(u);
+                    String imagePath = imagePaths.uploadUrl(u);
                     uploadImage(imagePath, image);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
                     u.setProfilePicture(fullImagePath);
                     repoProvider.userRepository.save(u);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
@@ -74,13 +77,13 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity> deleteUserPhoto(BigInteger id, String imagePath) {
+    public DeferredResult<ResponseEntity> deleteUserPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
                     deleteImage(fullImagePath);
                     u.setProfilePicture(null);
                     repoProvider.userRepository.save(u);
@@ -95,7 +98,7 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(BigInteger id) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.wishRepository.findById(id).addCallback(
@@ -112,15 +115,15 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> addWishPhoto(BigInteger id, MultipartFile image) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> addWishPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    String imagePath = ImagePaths.uploadUrl(w);
+                    String imagePath = imagePaths.uploadUrl(w);
                     uploadImage(imagePath, image);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
                     w.getPictures().add(fullImagePath);
                     repoProvider.wishRepository.save(w);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
@@ -134,13 +137,13 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(BigInteger id, String imagePath) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
 
                     if (w.getPictures().contains(fullImagePath)) {
                         w.getPictures().remove(fullImagePath);
@@ -161,7 +164,7 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> getStoryPhotos(BigInteger id) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> getStoryPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.storyRepository.findById(id).addCallback(
@@ -178,15 +181,15 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> addStoryPhoto(BigInteger id, MultipartFile image) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> addStoryPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    String imagePath = ImagePaths.uploadUrl(s);
+                    String imagePath = imagePaths.uploadUrl(s);
                     uploadImage(imagePath, image);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
                     s.getPictures().add(fullImagePath);
                     repoProvider.storyRepository.save(s);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
@@ -200,13 +203,13 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(BigInteger id, String imagePath) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    String fullImagePath = ImagePaths.accessUrl(imagePath);
+                    String fullImagePath = imagePaths.accessUrl(imagePath);
 
                     if (s.getPictures().contains(fullImagePath)) {
                         s.getPictures().remove(fullImagePath);
@@ -230,6 +233,9 @@ public class AmazonS3ImageService implements ImageService {
         try {
             PutObjectRequest request = new PutObjectRequest(bucket, imagePath, multipartFileToFile(image));
             request.withCannedAcl(CannedAccessControlList.PublicRead);
+            System.out.println(imagePath);
+            System.out.println(request.getBucketName());
+            
             client.putObject(request);
         } catch (AmazonServiceException ase) {
             log.error("Request to S3 was rejected with an error response."

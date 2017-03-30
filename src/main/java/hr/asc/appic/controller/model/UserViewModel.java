@@ -1,6 +1,5 @@
 package hr.asc.appic.controller.model;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +21,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain=true)
 public class UserViewModel {
 
+	private String id;
 	private String email;
 	private String password;
 	private String name;
@@ -35,7 +35,8 @@ public class UserViewModel {
 	private String contactNumber;
 	private String contactFacebook;
 	private Boolean profileConfirmed;
-	private Long coins;
+	private String coins;
 
-	private Set<BigInteger> upvotes = new HashSet<>();
+	private Set<String> upvotes = new HashSet<>();
+	private Set<String> reports = new HashSet<>();
 }

@@ -1,14 +1,13 @@
 package hr.asc.appic.controller.model;
 
+import java.util.Collections;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.List;
 
 @Getter
 @Setter
@@ -17,10 +16,10 @@ import java.util.List;
 @Accessors(chain = true)
 public class ImagePathModel {
 
-    private BigInteger id;
+    private String id;
     private List<String> paths;
 
-    public ImagePathModel(BigInteger id, String path) {
+    public ImagePathModel(String id, String path) {
         this.id = id;
         this.paths = Collections.singletonList(path);
     }

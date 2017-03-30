@@ -1,18 +1,18 @@
 package hr.asc.appic.service;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import hr.asc.appic.persistence.model.Offer;
-import hr.asc.appic.persistence.model.Story;
-import hr.asc.appic.persistence.model.User;
-import hr.asc.appic.persistence.model.Wish;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.math.BigInteger;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+
+import hr.asc.appic.persistence.model.Offer;
+import hr.asc.appic.persistence.model.Story;
+import hr.asc.appic.persistence.model.User;
+import hr.asc.appic.persistence.model.Wish;
 
 @Service
 public class ReportService {
@@ -23,8 +23,8 @@ public class ReportService {
     private RepoProvider repoProvider;
 
     public DeferredResult<ResponseEntity> report(ContentOrigin origin,
-                                                 BigInteger resourceId,
-                                                 BigInteger userId) {
+    		String resourceId,
+    		String userId) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<Void> reportJob = listeningExecutorService.submit(

@@ -20,20 +20,20 @@ public class ReportController {
     private ReportService reportService;
 
     @RequestMapping(value = "/wish", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportWish(@RequestParam("wish") BigInteger wishId,
-                                                     @RequestParam("user") BigInteger userId) {
+    public DeferredResult<ResponseEntity> reportWish(@RequestParam("wish") String wishId,
+                                                     @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.WISH, wishId, userId);
     }
 
     @RequestMapping(value = "/offer", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportOffer(@RequestParam("offer") BigInteger offerId,
-                                                      @RequestParam("user") BigInteger userId) {
+    public DeferredResult<ResponseEntity> reportOffer(@RequestParam("offer") String offerId,
+                                                      @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.OFFER, offerId, userId);
     }
 
     @RequestMapping(value = "/story", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportStory(@RequestParam("story") BigInteger storyId,
-                                                      @RequestParam("user") BigInteger userId) {
+    public DeferredResult<ResponseEntity> reportStory(@RequestParam("story") String storyId,
+                                                      @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.STORY, storyId, userId);
     }
 }

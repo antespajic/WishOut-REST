@@ -2,9 +2,14 @@ package hr.asc.appic.mapping;
 
 import java.util.Date;
 
+import org.springframework.stereotype.Service;
+
+import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryViewModel;
+import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.persistence.model.Story;
 
+@Service
 public class StoryMapper implements Mapper<Story, StoryViewModel> {
 
 	@Override
@@ -30,6 +35,13 @@ public class StoryMapper implements Mapper<Story, StoryViewModel> {
 			.setReportCount(pojo.getReportCount());
 		
 		return svm;
+	}
+
+	public StoryExportModel pojoToExportModel(StoryViewModel story, UserLightViewModel creator, UserLightViewModel sponsor) {
+		return new StoryExportModel()
+				.setStory(story)
+				.setCreator(creator)
+				.setSponsor(sponsor);
 	}
 
 }

@@ -1,15 +1,15 @@
 package hr.asc.appic.persistence.model;
 
+import java.util.Date;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.math.BigInteger;
-import java.util.Date;
 
 @Document
 @Getter
@@ -20,11 +20,11 @@ import java.util.Date;
 public class Offer {
 
     @Id
-    private BigInteger id;
-    private BigInteger userId;
-    private BigInteger wishId;
+    private String id;
+    private String userId;
+    private String wishId;
     private String description;
     private Date created;
-    private Long upvoteCount;
-    private Long reportCount;
+    private String upvoteCount;
+    private String reportCount;
 }

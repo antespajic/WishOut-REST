@@ -26,7 +26,7 @@ public class OfferController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public DeferredResult deleteOffer(@PathVariable("id") BigInteger id) {
+    public DeferredResult deleteOffer(@PathVariable("id") String id) {
         return offerService.deleteOffer(id);
     }
 }

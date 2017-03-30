@@ -1,12 +1,11 @@
 package hr.asc.appic.controller.model;
 
+import java.util.Date;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.math.BigInteger;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -14,11 +13,11 @@ import java.util.Date;
 @Accessors(chain = true)
 public class OfferModel {
 
-    private BigInteger id;
-    private BigInteger userId;
-    private BigInteger wishId;
+    private String id;
+    private String userId;
+    private String wishId;
     private String description;
     private Date created;
-    private Long upvoteCount;
-    private Long reportCount;
+    private String upvoteCount;
+    private String reportCount;
 }

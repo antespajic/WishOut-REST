@@ -3,7 +3,7 @@
 #### Image retireval
 * **URL:** `/image/:resource/:id`
 * **Method:** `GET`
-* **URL paramteres:** `resource = ['user','wish','story']`, `id = Long`
+* **URL paramteres:** `resource = ['user','wish','story']`, `id = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
@@ -15,7 +15,7 @@
 #### Image upload
 * **URL:** `/image/:resource/:id`
 * **Method:** `PUT`
-* **URL paramteres:** `resource = ['user','wish','story']`, `id = Long`
+* **URL paramteres:** `resource = ['user','wish','story']`, `id = String`
 * **Data parameters:** Header key: `image`, header value associated  with aformentioned key: `MultipartFile` - file for ulpoad
 * **Success response:**
     * **Code:** `200 OK`
@@ -74,7 +74,7 @@
 #### User retrieval
 * **URL:** `/user/:id`
 * **Method:** `GET`
-* **URL parameters:** `id = Long`
+* **URL parameters:** `id = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
@@ -104,7 +104,7 @@
 * **Note:** In the following definition and example of user update, user is represented with whole JSON object that was earlier described. However, user update can be performed with partial JSON object. In that case, JSON object **MUST** have it's user id parameter set. Lastly, only fields which are provided will be updated.
 * **URL:** `/user/:id`
 * **Method:** `PUT`
-* **URL paramteres:** `id = Long`
+* **URL paramteres:** `id = String`
 * **Data parameters:**
     ```json
     {
@@ -133,7 +133,7 @@
 #### User deletion
 * **URL:** `/user/:id`
 * **Method:** `DELETE`
-* **URL paramteres:** `id = Long`
+* **URL paramteres:** `id = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
@@ -182,7 +182,7 @@
 #### Wish retrieval
 * **URL:** `/wish/:wishId?lower=:lower&upper=:upper`
 * **Method:** `GET`
-* **URL parameters:** `wishId = Long`, `lower = Int`, `upper = Int`
+* **URL parameters:** `wishId = String`, `lower = Int`, `upper = Int`
 * **Data parameters:** not present
 * **Success response:**
     * **Code:** `200 OK`
@@ -248,7 +248,7 @@
 #### Wish deletion
 * **URL:** `/wish/:wishId`
 * **Method:** `DELETE`
-* **URL parameters:** `wishId = Long`
+* **URL parameters:** `wishId = String`
 * **Data parameters:** not present
 * **Success response:**
     * **Code:** `200 OK`
@@ -293,7 +293,7 @@
 #### Story retrieval
 * **URL:** `/story/:id`
 * **Method:** `GET`
-* **URL parameters:** `id = Long`
+* **URL parameters:** `id = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
@@ -363,7 +363,7 @@
 #### Offer deletion
 * **URL:** `/offer/:offerId`
 * **Method:** `DELETE`
-* **URL parameters:** `offerId = Long`
+* **URL parameters:** `offerId = String`
 * **Data parameters:** not present
 * **Success response:**
     * **Code:** `200 OK`
@@ -375,7 +375,7 @@ Upvote functionality behaves the same accross resources that support upvoting. O
 * **Wish URL:** `/upvote?wish=:wishId&user=:userId`
 * **Offer URL:** `/upvote?offer=:offerId&user=:userId`
 * **Method:** `PUT`
-* **URL parameters:** `resourceId = Long`, `userId = Long`
+* **URL parameters:** `resourceId = String`, `userId = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
@@ -388,7 +388,7 @@ Report functionality behaves the same accross resources that support reporting. 
 * **Offer URL:** `/report?offer=:offerId&user=:userId`
 * **Story URL:** `/report?story=:storyId&user=:userId`
 * **Method:** `PUT`
-* **URL parameters:** `resourceId = Long`, `userId = Long`
+* **URL parameters:** `resourceId = String`, `userId = String`
 * **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`

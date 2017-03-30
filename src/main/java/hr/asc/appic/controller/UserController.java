@@ -1,5 +1,7 @@
 package hr.asc.appic.controller;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,15 +12,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import hr.asc.appic.controller.model.OfferModel;
+import hr.asc.appic.controller.model.StoryViewModel;
 import hr.asc.appic.controller.model.UserViewModel;
+import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.service.UserService;
 
 @RestController
 @RequestMapping(value="/user")
 public class UserController {
 
-	@Autowired
-	private UserService userService;
+	@Autowired private UserService userService;
 	
 	@RequestMapping(
             method = RequestMethod.POST,
@@ -34,7 +38,7 @@ public class UserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity<UserViewModel>> getUser(@PathVariable Long id) {
+    public DeferredResult<ResponseEntity<UserViewModel>> getUser(@PathVariable String id) {
 		return userService.get(id);
 	}
 	
@@ -44,7 +48,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-	public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable Long id, @RequestBody UserViewModel viewModel) {
+	public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable String id, @RequestBody UserViewModel viewModel) {
 		return userService.update(id, viewModel);
 	}
 	
@@ -52,10 +56,35 @@ public class UserController {
 			value = "/{id}",
             method = RequestMethod.DELETE
     )
-    public DeferredResult<ResponseEntity<?>> deleteUser(@PathVariable Long id) {
+    public DeferredResult<ResponseEntity<?>> deleteUser(@PathVariable String id) {
 		return userService.delete(id);
 	}
 	
+	@RequestMapping(
+			value = "/{id}/wishes",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<Collection<WishModel>>> getUserWishes(@PathVariable String id) {
+		return userService.getWishes(id);
+	}
 	
+	@RequestMapping(
+			value = "/{id}/stories",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<Collection<StoryViewModel>>> getUserStories(@PathVariable String id) {
+		return userService.getStories(id);
+	}
+	
+	@RequestMapping(
+			value = "/{id}/offers",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<Collection<OfferModel>>> getUserOffers(@PathVariable String id) {
+		return userService.getOffers(id);
+	}
 	
 }

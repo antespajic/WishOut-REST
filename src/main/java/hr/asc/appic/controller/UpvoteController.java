@@ -20,14 +20,14 @@ public class UpvoteController {
     private UpvoteService upvoteService;
 
     @RequestMapping(value = "/wish", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> upvoteWish(@RequestParam("wish") BigInteger wishId,
-                                                     @RequestParam("user") BigInteger userId) {
+    public DeferredResult<ResponseEntity> upvoteWish(@RequestParam("wish") String wishId,
+                                                     @RequestParam("user") String userId) {
         return upvoteService.upvote(ContentOrigin.WISH, wishId, userId);
     }
 
     @RequestMapping(value = "/offer", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> upvoteOffer(@RequestParam("offer") BigInteger offerId,
-                                                      @RequestParam("user") BigInteger userId) {
+    public DeferredResult<ResponseEntity> upvoteOffer(@RequestParam("offer") String offerId,
+                                                      @RequestParam("user") String userId) {
         return upvoteService.upvote(ContentOrigin.OFFER, offerId, userId);
     }
 }
