@@ -3,37 +3,45 @@ package hr.asc.appic.service;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.controller.model.*;
 import hr.asc.appic.exception.ContentCheck;
+import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.mapping.WishMapper;
 import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.model.Wish;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Service
 public class WishService {
+
+    private static final String UPVOTE_COUNT_COLUMN = "upvoteCount";
 
     @Autowired
     private ListeningExecutorService listeningExecutorService;
     @Autowired
     private RepoProvider repoProvider;
     @Autowired
-    private WishMapper mapper;
+    private WishMapper wishMapper;
+    @Autowired
+    private OfferMapper offerMapper;
 
-    public DeferredResult<ResponseEntity> getWish(BigInteger id) {
+    public DeferredResult<ResponseEntity> getWish(Integer index, Integer size, BigInteger id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-        ListenableFuture<WishModel> getWishJob = listeningExecutorService.submit(
+        ListenableFuture<WishExportModel> getWishJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = repoProvider.wishRepository.findById(id).get();
-
-                    return null;
+                    return exportWish(index, size, wish);
                 }
         );
 
@@ -46,7 +54,7 @@ public class WishService {
 
         ListenableFuture<WishModel> createWishJob = listeningExecutorService.submit(
                 () -> {
-                    Wish wish = mapper.modelToPojo(model);
+                    Wish wish = wishMapper.modelToPojo(model);
 
                     User user = repoProvider.userRepository.findById(model.getUserId()).get();
                     ContentCheck.requireNonNull(model.getUserId(), user);
@@ -63,7 +71,7 @@ public class WishService {
 
                     repoProvider.userRepository.save(user);
                     repoProvider.wishRepository.save(wish);
-                    return mapper.pojoToModel(wish);
+                    return wishMapper.pojoToModel(wish);
                 }
         );
 
@@ -78,7 +86,7 @@ public class WishService {
                 () -> {
                     Wish wish = repoProvider.wishRepository.findById(id).get();
                     ContentCheck.requireNonNull(id, wish);
-                    mapper.updatePojoFromModel(wish, model);
+                    wishMapper.updatePojoFromModel(wish, model);
 
                     if (model.getOfferId() != null) {
                         Offer offer = repoProvider.offerRepository.findById(model.getOfferId()).get();
@@ -97,7 +105,7 @@ public class WishService {
     public DeferredResult<ResponseEntity> deleteWish(BigInteger id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-        ListenableFuture<WishModel> deleteWishJob = listeningExecutorService.submit(
+        ListenableFuture<Void> deleteWishJob = listeningExecutorService.submit(
                 () -> {
                     repoProvider.wishRepository.delete(id).get();
                     return null;
@@ -106,5 +114,46 @@ public class WishService {
 
         Futures.addCallback(deleteWishJob, new ResponseEntityCallback<>(result));
         return result;
+    }
+
+    private WishExportModel exportWish(Integer index, Integer size, Wish wish) throws Exception {
+        Pageable page = new PageRequest(index, size, new Sort(Sort.Direction.DESC, UPVOTE_COUNT_COLUMN));
+
+        List<Offer> offers = repoProvider.offerRepository.findByWishId(wish.getId(), page);
+        User creator = repoProvider.userRepository.findById(wish.getUser().getId()).get();
+
+        WishExportModel wishExportModel = new WishExportModel();
+        wishExportModel.setCreator(lightModelFromUser(creator));
+        wishExportModel.setWish(wishMapper.pojoToModel(wish));
+        wishExportModel.setInteraction(interactionModelForUser(creator, wish.getId()));
+
+        for (Offer offer : offers) {
+            User user = repoProvider.userRepository.findById(offer.getUserId()).get();
+
+            OfferExportModel offerExportModel = new OfferExportModel();
+            offerExportModel.setOffer(offerMapper.pojoToModel(offer));
+            offerExportModel.setUser(lightModelFromUser(user));
+            offerExportModel.setInteraction(interactionModelForUser(user, offer.getId()));
+
+            wishExportModel.getOffers().add(offerExportModel);
+        }
+
+        return wishExportModel;
+    }
+
+    private UserLightViewModel lightModelFromUser(User user) {
+        UserLightViewModel model = new UserLightViewModel();
+        model.setId(user.getId());
+        model.setFirstName(user.getName());
+        model.setLastName(user.getSurname());
+        model.setProfilePicture(user.getProfilePicture());
+        return model;
+    }
+
+    private InteractionModel interactionModelForUser(User user, BigInteger resource) {
+        InteractionModel model = new InteractionModel();
+        model.setUpvoted(user.getUpvotes().contains(resource));
+        model.setReported(user.getReports().contains(resource));
+        return model;
     }
 }

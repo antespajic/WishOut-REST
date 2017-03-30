@@ -54,8 +54,8 @@ public class OfferService {
                     Wish wish = repoProvider.wishRepository.findById(model.getWishId()).get();
                     ContentCheck.requireNonNull(model.getWishId(), wish);
 
-                    offer.setUser(user);
-                    offer.setWish(wish);
+                    offer.setUserId(user.getId());
+                    offer.setWishId(wish.getId());
                     user.getOffers().add(offer);
                     wish.getOffers().add(offer);
 

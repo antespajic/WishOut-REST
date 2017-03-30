@@ -6,7 +6,7 @@ import hr.asc.appic.persistence.model.Wish;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ImagePaths {
@@ -23,35 +23,38 @@ public class ImagePaths {
     private static final String storyDir = "story/";
     private static final String accessRoot = region + "." + url + "/" + bucket + "/";
 
-    public static String originForUser(User u) {
+    public static String accessUrl(User u) {
         return accessRoot + u.getProfilePicture();
     }
 
-    public static String destinationForUser(User u) {
+    public static String destinationUrl(User u) {
         return userDir + u.getId() + "_" + new Date().getTime();
     }
 
-    public static String[] originsForWish(Wish wish) {
-        return accessRootsFromList(wish.getPictures());
+    public static List<String> accessUrls(Wish wish) {
+        return accessUrlsFromList(wish.getPictures());
     }
 
-    public static String destinationForWish(Wish wish) {
+    public static String destinationUrls(Wish wish) {
         return wishDir + wish.getId() + "_" + new Date().getTime();
     }
 
-    public static String[] originsForStory(Story story) {
-        return accessRootsFromList(story.getPictures());
+    public static List<String> accessUrls(Story story) {
+        return accessUrlsFromList(story.getPictures());
     }
 
-    public static String destinationForStory(Story story) {
+    public static String destinationUrls(Story story) {
         return storyDir + story.getId() + "_" + new Date().getTime();
     }
 
-    private static String[] accessRootsFromList(Set<String> paths) {
-        paths = paths
+    public static String accessUrlFromDestinationUrl(String url) {
+        return url.substring(accessRoot.length());
+    }
+
+    private static List<String> accessUrlsFromList(List<String> paths) {
+        return paths
                 .stream()
                 .map(p -> accessRoot + p)
-                .collect(Collectors.toSet());
-        return paths.toArray(new String[]{});
+                .collect(Collectors.toList());
     }
 }

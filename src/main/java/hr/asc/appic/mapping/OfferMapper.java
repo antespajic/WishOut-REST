@@ -11,6 +11,8 @@ public class OfferMapper implements Mapper<Offer, OfferModel> {
     public Offer modelToPojo(OfferModel model) {
         Offer offer = new Offer();
         offer.setId(model.getId())
+                .setUserId(model.getUserId())
+                .setWishId(model.getWishId())
                 .setDescription(model.getDescription())
                 .setUpvoteCount(model.getUpvoteCount())
                 .setReportCount(model.getReportCount());
@@ -21,8 +23,8 @@ public class OfferMapper implements Mapper<Offer, OfferModel> {
     public OfferModel pojoToModel(Offer offer) {
         OfferModel model = new OfferModel();
         model.setId(offer.getId())
-                .setUserId(offer.getUser().getId())
-                .setWishId(offer.getWish().getId())
+                .setUserId(offer.getUserId())
+                .setWishId(offer.getWishId())
                 .setDescription(offer.getDescription())
                 .setUpvoteCount(offer.getUpvoteCount())
                 .setReportCount(offer.getReportCount());

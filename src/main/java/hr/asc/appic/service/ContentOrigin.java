@@ -2,5 +2,5 @@ package hr.asc.appic.service;
 
 public enum ContentOrigin {
 
-    WISH, OFFER, STORY;
+    USER, WISH, OFFER, STORY;
 }

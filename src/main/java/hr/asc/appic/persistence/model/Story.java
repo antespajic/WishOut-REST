@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 @Document
 @NoArgsConstructor
@@ -35,7 +35,7 @@ public class Story {
     /**
      * Represents picture URL's
      */
-    private Set<String> pictures = new HashSet<>();
+    private List<String> pictures = new LinkedList<>();
 
     private Long reportCount;
 }

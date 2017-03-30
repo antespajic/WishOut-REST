@@ -7,8 +7,8 @@ import lombok.experimental.Accessors;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -20,8 +20,8 @@ public class WishModel {
     private BigInteger userId;
     private String title;
     private String description;
-    private List<String> categories;
-    private Set<String> pictures;
+    private List<String> categories = new LinkedList<>();
+    private List<String> pictures = new LinkedList<>();
     private Date created;
     private BigInteger offerId;
     private Integer state;

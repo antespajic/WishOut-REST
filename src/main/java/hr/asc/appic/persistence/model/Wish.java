@@ -27,7 +27,7 @@ public class Wish {
     private String title;
     private String description;
     private List<String> categories = new LinkedList<>();
-    private Set<String> pictures = new HashSet<>();
+    private List<String> pictures = new LinkedList<>();
     private Date created;
     @DBRef
     private Offer offer;

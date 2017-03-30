@@ -22,10 +22,9 @@ public class WishController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity> getWish(@PathVariable("id") BigInteger id,
-                                                  @RequestParam("lower") Long lower,
-                                                  @RequestParam(value = "upper") Long upper) {
-
-        return null;
+                                                  @RequestParam("index") Integer index,
+                                                  @RequestParam(value = "size") Integer size) {
+        return wishService.getWish(index, size, id);
     }
 
     @RequestMapping(
