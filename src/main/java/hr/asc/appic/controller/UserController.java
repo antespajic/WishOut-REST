@@ -14,7 +14,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import hr.asc.appic.controller.model.OfferModel;
 import hr.asc.appic.controller.model.StoryViewModel;
-import hr.asc.appic.controller.model.UserViewModel;
+import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.service.UserService;
 
@@ -29,7 +29,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity<UserViewModel>> registerUser(@RequestBody UserViewModel viewModel) {
+    public DeferredResult<ResponseEntity<UserModel>> registerUser(@RequestBody UserModel viewModel) {
 		return userService.create(viewModel);
 	}
 	
@@ -38,7 +38,7 @@ public class UserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity<UserViewModel>> getUser(@PathVariable String id) {
+    public DeferredResult<ResponseEntity<UserModel>> getUser(@PathVariable String id) {
 		return userService.get(id);
 	}
 	
@@ -48,7 +48,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-	public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable String id, @RequestBody UserViewModel viewModel) {
+	public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable String id, @RequestBody UserModel viewModel) {
 		return userService.update(id, viewModel);
 	}
 	

@@ -11,30 +11,59 @@ import java.util.Date;
 @Service
 public class ImagePaths {
 
-    @Value("${aws-region}")
-    private String region;
-    @Value("${aws-url}")
-    private String url;
-    @Value("${aws-bucket-image}")
-    private String bucket;
+    private String userDir;
+    private String wishDir;
+    private String storyDir;
+    private String accessRoot;
 
-    private String userDir = "user/";
-    private String wishDir = "wish/";
-    private String storyDir = "story/";
+    public ImagePaths(@Value("${aws-region}") String region,
+                      @Value("${aws-url}") String url,
+                      @Value("${aws-bucket-image}") String bucket,
+                      @Value("${aws-image-user-dir}") String userDir,
+                      @Value("${aws-image-wish-dir}") String wishDir,
+                      @Value("${aws-image-story-dir}") String storyDir) {
+        this.userDir = userDir;
+        this.wishDir = wishDir;
+        this.storyDir = storyDir;
+
+        accessRoot = region + "." + url + "/" + bucket + "/";
+    }
+
+
+    public String accessUrl(String resourceUrl) {
+        return accessRoot + resourceUrl;
+    }
 
     public String uploadUrl(User u) {
-        return userDir + u.getId() + "_" + new Date().getTime();
+        return userDir + "/" + u.getId() + "_" + new Date().getTime();
+    }
+
+    public String deleteUrl(User u) {
+        if (u.getProfilePicture() != null) {
+            return u.getProfilePicture().substring(accessRoot.length());
+        }
+        throw new NullPointerException("Image for user is not present");
     }
 
     public String uploadUrl(Wish wish) {
-        return wishDir + wish.getId() + "_" + new Date().getTime();
+        return wishDir + "/" + wish.getId() + "_" + new Date().getTime();
+    }
+
+    public String deleteUrl(Wish wish, String imagePath) {
+        if (wish.getPictures().contains(imagePath)) {
+            return imagePath.substring(accessRoot.length());
+        }
+        throw new NullPointerException("Image for wish is not present");
     }
 
     public String uploadUrl(Story story) {
-        return storyDir + story.getId() + "_" + new Date().getTime();
+        return storyDir + "/" + story.getId() + "_" + new Date().getTime();
     }
 
-    public String accessUrl(String destinationUrl) {
-        return region + "." + url + "/" + bucket + "/" + destinationUrl;
+    public String deleteUrl(Story story, String imagePath) {
+        if (story.getPictures().contains(imagePath)) {
+            return imagePath.substring(accessRoot.length());
+        }
+        throw new NullPointerException("Image for story is not present");
     }
 }

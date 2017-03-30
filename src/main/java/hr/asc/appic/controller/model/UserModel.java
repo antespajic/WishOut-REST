@@ -1,27 +1,21 @@
-package hr.asc.appic.persistence.model;
+package hr.asc.appic.controller.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-@Document
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class User {
+public class UserModel {
 
-    @Id private String id;
+    private String id;
     private String email;
     private String password;
     private String firstName;
@@ -36,11 +30,4 @@ public class User {
     private String contactFacebook;
     private Boolean profileConfirmed;
     private String coins;
-
-    private Set<String> upvotes = new HashSet<>();
-    private Set<String> reports = new HashSet<>();
-
-    @DBRef private Set<Wish> wishes = new HashSet<>();
-    @DBRef private Set<Offer> offers = new HashSet<>();
-    @DBRef private Set<Story> stories = new HashSet<>();
 }

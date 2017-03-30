@@ -35,11 +35,6 @@ public class WishMapper implements Mapper<Wish, WishModel> {
                 .setState(wish.getState())
                 .setUpvoteCount(wish.getUpvoteCount())
                 .setReportCount(wish.getReportCount());
-
-        if (wish.getOffer() != null) {
-            model.setOfferId(wish.getId());
-        }
-
         return model;
     }
 

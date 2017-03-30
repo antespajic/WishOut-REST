@@ -16,7 +16,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 
 import hr.asc.appic.controller.model.OfferModel;
 import hr.asc.appic.controller.model.StoryViewModel;
-import hr.asc.appic.controller.model.UserViewModel;
+import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.mapping.StoryMapper;
@@ -41,8 +41,8 @@ public class UserService {
 	@Autowired private StoryMapper storyMapper;
 	@Autowired private OfferMapper offerMapper;
 
-	public DeferredResult<ResponseEntity<UserViewModel>> create(UserViewModel viewModel) {
-		DeferredResult<ResponseEntity<UserViewModel>> res = new DeferredResult<>();
+	public DeferredResult<ResponseEntity<UserModel>> create(UserModel viewModel) {
+		DeferredResult<ResponseEntity<UserModel>> res = new DeferredResult<>();
 
 		userRepository.save(map.modelToPojo(viewModel)).addCallback(
 				response -> res.setResult(ResponseEntity.status(HttpStatus.OK).body(map.pojoToModel(response))),
@@ -53,8 +53,8 @@ public class UserService {
 		return res;
 	}
 
-	public DeferredResult<ResponseEntity<UserViewModel>> get(String id) {
-		DeferredResult<ResponseEntity<UserViewModel>> res = new DeferredResult<>();
+	public DeferredResult<ResponseEntity<UserModel>> get(String id) {
+		DeferredResult<ResponseEntity<UserModel>> res = new DeferredResult<>();
 		userRepository.findById(id).addCallback(
 				response -> {
 					Assert.notNull(response, "Couldn't find a user with provided ID");
@@ -67,7 +67,7 @@ public class UserService {
 		return res;
 	}
 
-	public DeferredResult<ResponseEntity<?>> update(String id, UserViewModel viewModel) {
+	public DeferredResult<ResponseEntity<?>> update(String id, UserModel viewModel) {
 		DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
 
 		com.google.common.util.concurrent.ListenableFuture<ResponseEntity<?>>
@@ -169,13 +169,13 @@ public class UserService {
 		return res;
 	}
 	
-	private void updateUserPartial(User user, UserViewModel viewModel) {
-		if (viewModel.getName() != null) {
-			user.setName(viewModel.getName());
+	private void updateUserPartial(User user, UserModel viewModel) {
+		if (viewModel.getFirstName() != null) {
+			user.setFirstName(viewModel.getFirstName());
 		}
 		
-		if (viewModel.getSurname() != null) {
-			user.setSurname(viewModel.getSurname());
+		if (viewModel.getLastName() != null) {
+			user.setLastName(viewModel.getLastName());
 		}
 		
 		if (viewModel.getCountry() != null) {
@@ -204,10 +204,6 @@ public class UserService {
 		
 		if (viewModel.getProfilePicture() != null) {
 			user.setProfilePicture(viewModel.getProfilePicture());
-		}
-		
-		if (viewModel.getUpvotes() != null) {
-			user.setUpvotes(viewModel.getUpvotes());
 		}
 		
 		if (viewModel.getCoins() != null) {

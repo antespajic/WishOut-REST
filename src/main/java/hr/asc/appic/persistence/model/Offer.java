@@ -25,6 +25,7 @@ public class Offer {
     private String wishId;
     private String description;
     private Date created;
+    private Boolean chosen;
     private String upvoteCount;
     private String reportCount;
 }
