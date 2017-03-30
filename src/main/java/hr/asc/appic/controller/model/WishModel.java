@@ -14,19 +14,17 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class StoryViewModel {
+public class WishModel {
 
-    private BigInteger wishId;
-    private BigInteger creatorId;
-    private BigInteger sponsorId;
-
-    private Date created;
+    private BigInteger id;
+    private BigInteger userId;
+    private String title;
     private String description;
-
-    /**
-     * Represents picture URL's
-     */
+    private List<String> categories = new LinkedList<>();
     private List<String> pictures = new LinkedList<>();
-
+    private Date created;
+    private BigInteger offerId;
+    private Integer state;
+    private Long upvoteCount;
     private Long reportCount;
 }
