@@ -39,25 +39,6 @@ public class User {
     private boolean profileConfirmed;
     private Long coins;
 
-    @Id
-    @Setter(value = AccessLevel.NONE)
-    private BigInteger id;
-
-    private String email;
-    private String password;
-    private String name;
-    private String surname;
-    private String country;
-    private String city;
-    private String gender;
-    private Date dateOfBirth;
-    private Date dateOfRegistration;
-    private String profilePicture;
-    private String contactNumber;
-    private String contactFacebook;
-    private boolean profileConfirmed;
-    private Long coins;
-
     private Set<BigInteger> upvotes = new HashSet<>();
     private Set<BigInteger> reports = new HashSet<>();
 
