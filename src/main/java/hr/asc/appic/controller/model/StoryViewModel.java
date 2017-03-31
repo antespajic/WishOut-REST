@@ -15,6 +15,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class StoryViewModel {
 
+	private String storyId;
     private String wishId;
     private String creatorId;
     private String sponsorId;
