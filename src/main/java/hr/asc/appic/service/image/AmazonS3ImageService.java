@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 @Slf4j
 @Service
@@ -229,8 +230,11 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     private void uploadImage(String imagePath, MultipartFile image) {
+
+        File imageFile = null;
         try {
-            PutObjectRequest request = new PutObjectRequest(bucket, imagePath, multipartFileToFile(image));
+            imageFile = multipartFileToFile(image);
+            PutObjectRequest request = new PutObjectRequest(bucket, imagePath, imageFile);
             request.withCannedAcl(CannedAccessControlList.PublicRead);
             client.putObject(request);
         } catch (AmazonServiceException ase) {
@@ -245,6 +249,10 @@ public class AmazonS3ImageService implements ImageService {
             log.error("Error occurred during communication with S3. Error message: "
                     + ace.getMessage());
             throw new ImageUploadException(ace);
+        } finally {
+            if (imageFile != null) {
+                imageFile.delete();
+            }
         }
     }
 
@@ -269,7 +277,10 @@ public class AmazonS3ImageService implements ImageService {
 
     private File multipartFileToFile(MultipartFile multipartFile) {
         try {
-            File convertedFile = new File(multipartFile.getOriginalFilename());
+            File convertedFile = Files.createTempFile(
+                    multipartFile.getOriginalFilename(),
+                    "-image"
+            ).toFile();
             FileOutputStream fos = new FileOutputStream(convertedFile);
             fos.write(multipartFile.getBytes());
             fos.close();
