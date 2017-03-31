@@ -3,10 +3,9 @@ package hr.asc.appic.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -25,7 +24,7 @@ public class StoryController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity<StoryViewModel>> createStory(@RequestBody StoryViewModel viewModel) {
+    public DeferredResult<ResponseEntity<StoryViewModel>> createStory(@PathVariable StoryViewModel viewModel) {
 		return storyService.create(viewModel);
 	}
 	
@@ -34,7 +33,7 @@ public class StoryController {
 			method = RequestMethod.GET,
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public DeferredResult<ResponseEntity<StoryExportModel>> getStory(@RequestParam String id) {
+	public DeferredResult<ResponseEntity<StoryExportModel>> getStory(@PathVariable String id) {
 		return storyService.get(id);
 	}
 	
@@ -43,7 +42,7 @@ public class StoryController {
 			method = RequestMethod.DELETE,
 			produces = MediaType.APPLICATION_JSON_VALUE
 	)
-	public DeferredResult<ResponseEntity<?>> deleteStory(@RequestParam String id) {
+	public DeferredResult<ResponseEntity<?>> deleteStory(@PathVariable String id) {
 		return storyService.delete(id);
 	}
 }
