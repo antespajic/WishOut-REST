@@ -1,9 +1,16 @@
 package hr.asc.appic.service.image;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import hr.asc.appic.controller.model.ImagePathModel;
+import hr.asc.appic.exception.ContentCheck;
+import hr.asc.appic.exception.ImageUploadException;
+import hr.asc.appic.service.RepoProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-
-import hr.asc.appic.controller.model.ImagePathModel;
-import hr.asc.appic.exception.ContentCheck;
-import hr.asc.appic.exception.ImageUploadException;
-import hr.asc.appic.service.RepoProvider;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 @Slf4j
 @Service
@@ -35,8 +33,9 @@ public class AmazonS3ImageService implements ImageService {
     @Autowired
     private RepoProvider repoProvider;
 
-    @Autowired private ImagePaths imagePaths;
-    
+    @Autowired
+    private ImagePaths imagePaths;
+
     @Override
     public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
@@ -83,8 +82,8 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
-                    String fullImagePath = imagePaths.accessUrl(imagePath);
-                    deleteImage(fullImagePath);
+                    String deleteUrl = imagePaths.deleteUrl(u);
+                    deleteImage(deleteUrl);
                     u.setProfilePicture(null);
                     repoProvider.userRepository.save(u);
                     result.setResult(ResponseEntity.ok().build());
@@ -143,11 +142,11 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
-                    String fullImagePath = imagePaths.accessUrl(imagePath);
+                    String deleteUrl = imagePaths.deleteUrl(w, imagePath);
 
-                    if (w.getPictures().contains(fullImagePath)) {
-                        w.getPictures().remove(fullImagePath);
-                        deleteImage(imagePath);
+                    if (w.getPictures().contains(imagePath)) {
+                        w.getPictures().remove(imagePath);
+                        deleteImage(deleteUrl);
                         result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
                     } else {
                         result.setResult(ResponseEntity.badRequest().build());
@@ -209,11 +208,11 @@ public class AmazonS3ImageService implements ImageService {
         repoProvider.storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
-                    String fullImagePath = imagePaths.accessUrl(imagePath);
+                    String deleteUrl = imagePaths.deleteUrl(s, imagePath);
 
-                    if (s.getPictures().contains(fullImagePath)) {
-                        s.getPictures().remove(fullImagePath);
-                        deleteImage(imagePath);
+                    if (s.getPictures().contains(imagePath)) {
+                        s.getPictures().remove(imagePath);
+                        deleteImage(deleteUrl);
                         result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
                     } else {
                         result.setResult(ResponseEntity.badRequest().build());
@@ -233,9 +232,6 @@ public class AmazonS3ImageService implements ImageService {
         try {
             PutObjectRequest request = new PutObjectRequest(bucket, imagePath, multipartFileToFile(image));
             request.withCannedAcl(CannedAccessControlList.PublicRead);
-            System.out.println(imagePath);
-            System.out.println(request.getBucketName());
-            
             client.putObject(request);
         } catch (AmazonServiceException ase) {
             log.error("Request to S3 was rejected with an error response."
