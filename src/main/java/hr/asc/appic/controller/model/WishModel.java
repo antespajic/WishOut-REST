@@ -1,28 +1,24 @@
-package hr.asc.appic.persistence.model;
+package hr.asc.appic.controller.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-@Document
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Wish {
+public class WishModel {
 
-    @Id
     private String id;
-    @DBRef
-    private User user;
+    private String userId;
     private String title;
     private String description;
     private List<String> categories = new ArrayList<>();
@@ -31,6 +27,4 @@ public class Wish {
     private Integer state;
     private Integer upvoteCount;
     private Integer reportCount;
-
-    private Set<Offer> offers = new HashSet<>();
 }

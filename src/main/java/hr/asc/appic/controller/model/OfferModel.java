@@ -1,9 +1,4 @@
-package hr.asc.appic.persistence.model;
-
-import java.util.Date;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+package hr.asc.appic.controller.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,15 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-@Document
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Offer {
+public class OfferModel {
 
-    @Id
     private String id;
     private String userId;
     private String wishId;
