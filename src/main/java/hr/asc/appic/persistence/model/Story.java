@@ -1,25 +1,20 @@
 package hr.asc.appic.persistence.model;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
+import lombok.*;
+import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 @Document
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
 public class Story {
 
@@ -41,5 +36,5 @@ public class Story {
      */
     private List<String> pictures = new LinkedList<>();
 
-    private String reportCount;
+    private Integer reportCount;
 }

@@ -1,21 +1,23 @@
 package hr.asc.appic.controller.model;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class StoryViewModel {
+public class StoryModel {
 
-	private String storyId;
+    private String id;
     private String wishId;
     private String creatorId;
     private String sponsorId;
@@ -28,5 +30,5 @@ public class StoryViewModel {
      */
     private List<String> pictures = new LinkedList<>();
 
-    private String reportCount;
+    private Integer reportCount;
 }

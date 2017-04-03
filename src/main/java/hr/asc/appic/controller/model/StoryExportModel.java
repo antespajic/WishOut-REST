@@ -11,8 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class StoryExportModel {
 
-	private StoryViewModel story;
-	private UserLightViewModel creator;
-	private UserLightViewModel sponsor;
-	
+    private StoryModel story;
+    private UserLightViewModel creator;
+    private UserLightViewModel sponsor;
 }
