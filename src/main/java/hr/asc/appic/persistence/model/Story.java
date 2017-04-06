@@ -1,6 +1,9 @@
-	package hr.asc.appic.persistence.model;
+package hr.asc.appic.persistence.model;
 
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -19,7 +22,6 @@ import java.util.List;
 public class Story implements Comparable<Story> {
 
     @Id
-    @Setter(value = AccessLevel.NONE)
     private String id;
     @DBRef
     private Wish wish;
@@ -27,15 +29,9 @@ public class Story implements Comparable<Story> {
     private User creator;
     @DBRef
     private User sponsor;
-
-    private Date created;
     private String description;
-
-    /**
-     * Represents picture URL's
-     */
+    private Date created;
     private List<String> pictures = new LinkedList<>();
-
     private Integer reportCount;
 
     @Override

@@ -7,16 +7,18 @@ import hr.asc.appic.elasticsearch.model.StoryElasticModel;
 import hr.asc.appic.persistence.model.Story;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Service
 public class StoryMapper implements Mapper<Story, StoryModel> {
 
+    // Note: wish, creator and sponsor objects need
+    // to be set manually since database needs to be
+    // queried for those objects to be retrieved.
     @Override
     public Story modelToPojo(StoryModel model) {
         return new Story()
-                .setCreated(model.getCreated() == null ? new Date() : model.getCreated())
+                .setId(model.getId())
                 .setDescription(model.getDescription())
+                .setCreated(model.getCreated())
                 .setPictures(model.getPictures())
                 .setReportCount(model.getReportCount());
     }
@@ -25,11 +27,11 @@ public class StoryMapper implements Mapper<Story, StoryModel> {
     public StoryModel pojoToModel(Story pojo) {
         return new StoryModel()
                 .setId(pojo.getId())
-                .setCreated(pojo.getCreated())
+                .setWishId(pojo.getWish().getId())
                 .setCreatorId(pojo.getCreator().getId())
                 .setSponsorId(pojo.getSponsor().getId())
-                .setWishId(pojo.getWish().getId())
                 .setDescription(pojo.getDescription())
+                .setCreated(pojo.getCreated())
                 .setPictures(pojo.getPictures())
                 .setReportCount(pojo.getReportCount());
     }
@@ -48,6 +50,7 @@ public class StoryMapper implements Mapper<Story, StoryModel> {
                 .setStory(story)
                 .setCreator(creator)
                 .setSponsor(sponsor);
+        // In the future, interaction needs to be implemented.
     }
 
     public StoryElasticModel toElasticModel(Story story,

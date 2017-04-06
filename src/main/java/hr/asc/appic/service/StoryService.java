@@ -28,84 +28,129 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Service
 public class StoryService {
 
-    @Autowired private ListeningExecutorService listeningExecutorService;
+    @Autowired
+    private ListeningExecutorService listeningExecutorService;
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private WishRepository wishRepository;
-    @Autowired private StoryRepository storyRepository;
-    @Autowired private StoryElasticRepository storyElasticRepository;
-    
-    @Autowired private StoryMapper map;
-    @Autowired private UserMapper userMapper;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private WishRepository wishRepository;
+    @Autowired
+    private StoryRepository storyRepository;
+    @Autowired
+    private StoryElasticRepository storyElasticRepository;
+
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private StoryMapper storyMapper;
 
     public DeferredResult<ResponseEntity<StoryModel>> create(StoryModel svm) {
-        DeferredResult<ResponseEntity<StoryModel>> res = new DeferredResult<>();
+        DeferredResult<ResponseEntity<StoryModel>> result = new DeferredResult<>();
 
-        ListenableFuture<ResponseEntity<StoryModel>> createStory = listeningExecutorService
-                .submit(() -> {
-                            Story st = map.modelToPojo(svm);
+        ListenableFuture<StoryModel> createStoryJob = listeningExecutorService.submit(() -> {
+                    Story story = storyMapper.modelToPojo(svm);
 
-                            User u = userRepository.findById(svm.getCreatorId()).get();
-                            Wish w = wishRepository.findById(svm.getWishId()).get();
-                            User s = userRepository.findById(svm.getSponsorId()).get();
+                    Wish wish = wishRepository.findById(svm.getWishId()).get();
+                    User creator = userRepository.findById(svm.getCreatorId()).get();
+                    User sponsor = userRepository.findById(svm.getSponsorId()).get();
 
-                            st.setWish(w)
-                                    .setCreator(u)
-                                    .setSponsor(s);
+                    story.setWish(wish).setCreator(creator).setSponsor(sponsor);
+                    story = storyRepository.save(story).get();
 
-                            Story stori = storyRepository.save(st).get();
-                            storyElasticRepository.save(map.toElasticModel(
-                            		stori,
-                            		userMapper.lightModelFromUser(u),
-                            		userMapper.lightModelFromUser(s))
-                            		);
-                            return ResponseEntity.ok(map.pojoToModel(stori));
-                        }
-                );
+                    creator.getStories().add(story);
+                    userRepository.save(creator);
 
-        Futures.addCallback(createStory, new FutureCallback<ResponseEntity<StoryModel>>() {
+                    storyElasticRepository.save(storyMapper.toElasticModel(
+                            story,
+                            userMapper.lightModelFromUser(creator),
+                            userMapper.lightModelFromUser(sponsor))
+                    );
+
+                    return storyMapper.pojoToModel(story);
+                }
+        );
+
+        Futures.addCallback(createStoryJob, new FutureCallback<StoryModel>() {
 
             @Override
-            public void onSuccess(ResponseEntity<StoryModel> result) {
-                res.setResult(result);
+            public void onSuccess(StoryModel model) {
+                result.setResult(ResponseEntity.ok(model));
             }
 
             @Override
             public void onFailure(Throwable t) {
-                log.error("Error in creating story", t);
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while creating story object", t);
             }
-
         });
 
-        return res;
+        return result;
     }
 
-    public DeferredResult<ResponseEntity<StoryExportModel>> get(String id) {
-        DeferredResult<ResponseEntity<StoryExportModel>> res = new DeferredResult<>();
-        storyRepository.findById(id).addCallback(
-                response -> {
-                    Assert.notNull(response, "Couldn't find a story with provided id " + id);
-                    UserLightViewModel creator = userMapper.lightModelFromUser(response.getCreator());
-                    UserLightViewModel sponsor = userMapper.lightModelFromUser(response.getSponsor());
-                    StoryModel story = map.pojoToModel(response);
-                    res.setResult(ResponseEntity.ok(map.pojoToExportModel(story, creator, sponsor)));
-                },
-                error -> {
-                    res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                    log.error("Error while getting story", error);
-                });
-        return res;
+    public DeferredResult<ResponseEntity<StoryExportModel>> getStory(String id) {
+        DeferredResult<ResponseEntity<StoryExportModel>> result = new DeferredResult<>();
+
+        ListenableFuture<StoryExportModel> getStoryJob = listeningExecutorService.submit(
+                () -> {
+                    Story story = storyRepository.findById(id).get();
+                    Assert.notNull(story, "Could not find story with id: " + id);
+
+                    UserLightViewModel creator = userMapper.lightModelFromUser(story.getCreator());
+                    UserLightViewModel sponsor = userMapper.lightModelFromUser(story.getSponsor());
+
+                    StoryModel model = storyMapper.pojoToModel(story);
+                    return storyMapper.pojoToExportModel(model, creator, sponsor);
+                    // In the future update, interaction model needs to be set.
+                }
+        );
+
+        Futures.addCallback(getStoryJob, new FutureCallback<StoryExportModel>() {
+
+            @Override
+            public void onSuccess(StoryExportModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while retrieving story object", t);
+            }
+        });
+
+        return result;
     }
 
-    public DeferredResult<ResponseEntity<?>> delete(String id) {
-        DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
-        storyElasticRepository.delete(id);
-        storyRepository.delete(id).addCallback(
-                response -> res.setResult(ResponseEntity.ok().build()),
-                error -> {
-                    res.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                    log.error("Error deleting story", error);
-                });
-        return res;
+    public DeferredResult<ResponseEntity> updateStory(String id, StoryModel model) {
+        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+
+        ListenableFuture<Void> updateStoryJob = listeningExecutorService.submit(
+                () -> {
+                    Story story = storyRepository.findById(id).get();
+                    Assert.notNull(story, "Could not find story with id: " + id);
+
+                    storyMapper.updatePojoFromModel(story, model);
+                    storyRepository.save(story);
+
+                    return null;
+                }
+        );
+
+        Futures.addCallback(updateStoryJob, new FutureCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void voidable) {
+                result.setResult(ResponseEntity.ok().build());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while updating story object", t);
+            }
+        });
+
+        return result;
     }
 }
