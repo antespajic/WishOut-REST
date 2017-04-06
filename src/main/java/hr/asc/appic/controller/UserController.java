@@ -44,7 +44,7 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity> updateUser(@PathVariable String id,
+    public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable String id,
                                                      @RequestBody UserModel viewModel) {
         return userService.updateUser(id, viewModel);
     }
@@ -53,7 +53,7 @@ public class UserController {
             value = "/{id}",
             method = RequestMethod.DELETE
     )
-    public DeferredResult<ResponseEntity> deleteUser(@PathVariable String id) {
+    public DeferredResult<ResponseEntity<?>> deleteUser(@PathVariable String id) {
         return userService.deleteUser(id);
     }
 

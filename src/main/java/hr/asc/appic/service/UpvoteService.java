@@ -33,10 +33,10 @@ public class UpvoteService {
     @Autowired
     private OfferRepository offerRepository;
 
-    public DeferredResult<ResponseEntity> upvote(ContentOrigin origin,
+    public DeferredResult<ResponseEntity<?>> upvote(ContentOrigin origin,
                                                  String resourceId,
                                                  String userId) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         ListenableFuture<Void> upvoteJob = listeningExecutorService.submit(
                 () -> {

@@ -41,7 +41,7 @@ public class WishController {
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity> updateWish(@PathVariable("id") String id,
+    public DeferredResult<ResponseEntity<?>> updateWish(@PathVariable("id") String id,
                                                      @RequestBody WishModel model) {
         return wishService.updateWish(id, model);
     }
@@ -51,7 +51,7 @@ public class WishController {
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity> assignOffer(@PathVariable("wishId") String wishId,
+    public DeferredResult<ResponseEntity<?>> assignOffer(@PathVariable("wishId") String wishId,
                                                       @PathVariable("offerId") String offerId,
                                                       @RequestParam("confirmed") boolean confirmed) {
         return wishService.assignOffer(wishId, offerId, confirmed);

@@ -71,8 +71,8 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> updateUser(String id, UserModel model) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<?>> updateUser(String id, UserModel model) {
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         ListenableFuture<Void> getUser = listeningExecutorService.submit(
                 () -> {
@@ -101,8 +101,8 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> deleteUser(String id) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<?>> deleteUser(String id) {
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         userRepository.delete(id).addCallback(
                 response -> result.setResult(ResponseEntity.ok().build()),
