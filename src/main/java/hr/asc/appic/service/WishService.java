@@ -124,15 +124,15 @@ public class WishService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity<?>> updateWish(String id, WishModel model) {
-        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity> updateWish(String id, WishModel model) {
+        DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
         ListenableFuture<Void> updateWishJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
 
-                    wishMapper.updateWishFromModel(wish, model);
+                    wishMapper.updatePojoFromModel(wish, model);
                     wish = wishRepository.save(wish).get();
 
                     wishElasticRepository.save(

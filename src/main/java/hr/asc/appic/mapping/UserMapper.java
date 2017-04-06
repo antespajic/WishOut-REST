@@ -49,21 +49,8 @@ public class UserMapper implements Mapper<User, UserModel> {
                 .setCoins(pojo.getCoins());
     }
 
-    public UserLightViewModel lightModelFromUser(User user) {
-        return new UserLightViewModel()
-                .setId(user.getId())
-                .setFirstName(user.getFirstName())
-                .setLastName(user.getLastName())
-                .setProfilePicture(user.getProfilePicture());
-    }
-
-    public InteractionModel interactionModelForUser(User user, String resource) {
-        return new InteractionModel()
-                .setUpvoted(user.getUpvotes().contains(resource))
-                .setReported(user.getReports().contains(resource));
-    }
-
-    public void updateUserFromModel(User user, UserModel viewModel) {
+    @Override
+    public void updatePojoFromModel(User user, UserModel viewModel) {
         if (viewModel.getFirstName() != null) {
             user.setFirstName(viewModel.getFirstName());
         }
@@ -94,5 +81,19 @@ public class UserMapper implements Mapper<User, UserModel> {
         if (viewModel.getCoins() != null) {
             user.setCoins(viewModel.getCoins());
         }
+    }
+
+    public UserLightViewModel lightModelFromUser(User user) {
+        return new UserLightViewModel()
+                .setId(user.getId())
+                .setFirstName(user.getFirstName())
+                .setLastName(user.getLastName())
+                .setProfilePicture(user.getProfilePicture());
+    }
+
+    public InteractionModel interactionModelForUser(User user, String resource) {
+        return new InteractionModel()
+                .setUpvoted(user.getUpvotes().contains(resource))
+                .setReported(user.getReports().contains(resource));
     }
 }

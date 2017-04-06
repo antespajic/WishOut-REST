@@ -21,14 +21,8 @@ public class StoryModel {
     private String wishId;
     private String creatorId;
     private String sponsorId;
-
-    private Date created;
     private String description;
-
-    /**
-     * Represents picture URL's
-     */
+    private Date created;
     private List<String> pictures = new LinkedList<>();
-
     private Integer reportCount;
 }

@@ -14,4 +14,5 @@ public class StoryExportModel {
     private StoryModel story;
     private UserLightViewModel creator;
     private UserLightViewModel sponsor;
+    private InteractionModel interaction;
 }

@@ -107,7 +107,7 @@ public class UserService {
                 () -> {
                     User user = userRepository.findById(id).get();
                     Assert.notNull(user, "Could not find user with id: " + id);
-                    userMapper.updateUserFromModel(user, model);
+                    userMapper.updatePojoFromModel(user, model);
                     userRepository.save(user);
                     return null;
                 }

@@ -13,8 +13,8 @@ public class WishMapper implements Mapper<Wish, WishModel> {
     // needs to be queried to retrieve full User object.
     @Override
     public Wish modelToPojo(WishModel model) {
-        Wish wish = new Wish();
-        wish.setId(model.getId())
+        return new Wish()
+                .setId(model.getId())
                 .setTitle(model.getTitle())
                 .setDescription(model.getDescription())
                 .setCategories(model.getCategories())
@@ -23,13 +23,12 @@ public class WishMapper implements Mapper<Wish, WishModel> {
                 .setState(model.getState())
                 .setUpvoteCount(model.getUpvoteCount())
                 .setReportCount(model.getReportCount());
-        return wish;
     }
 
     @Override
     public WishModel pojoToModel(Wish wish) {
-        WishModel model = new WishModel();
-        model.setId(wish.getId())
+        return new WishModel()
+                .setId(wish.getId())
                 .setUserId(wish.getUser().getId())
                 .setTitle(wish.getTitle())
                 .setDescription(wish.getDescription())
@@ -39,22 +38,10 @@ public class WishMapper implements Mapper<Wish, WishModel> {
                 .setState(wish.getState())
                 .setUpvoteCount(wish.getUpvoteCount())
                 .setReportCount(wish.getReportCount());
-        return model;
-    }
-    
-    public WishElasticModel toElasticModel(Wish wish, UserLightViewModel creator) {
-    	return WishElasticModel.builder()
-    			.creator(creator)
-    			.created(String.valueOf(wish.getCreated().getTime()))
-    			.categories(wish.getCategories())
-    			.id(wish.getId())
-    			.title(wish.getTitle())
-    			.state(wish.getState())
-    			.upvoteCount(wish.getUpvoteCount())
-    			.description(wish.getDescription()).build();
     }
 
-    public void updateWishFromModel(Wish wish, WishModel model) {
+    @Override
+    public void updatePojoFromModel(Wish wish, WishModel model) {
         if (model.getTitle() != null) {
             wish.setTitle(model.getTitle());
         }
@@ -67,5 +54,17 @@ public class WishMapper implements Mapper<Wish, WishModel> {
         if (model.getState() != null) {
             wish.setState(model.getState());
         }
+    }
+
+    public WishElasticModel toElasticModel(Wish wish, UserLightViewModel creator) {
+        return WishElasticModel.builder()
+                .creator(creator)
+                .created(String.valueOf(wish.getCreated().getTime()))
+                .categories(wish.getCategories())
+                .id(wish.getId())
+                .title(wish.getTitle())
+                .state(wish.getState())
+                .upvoteCount(wish.getUpvoteCount())
+                .description(wish.getDescription()).build();
     }
 }
