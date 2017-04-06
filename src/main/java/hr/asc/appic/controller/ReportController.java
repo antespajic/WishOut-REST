@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import java.math.BigInteger;
-
 @RestController
 @RequestMapping("/report")
 public class ReportController {
@@ -20,19 +18,19 @@ public class ReportController {
     private ReportService reportService;
 
     @RequestMapping(value = "/wish", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportWish(@RequestParam("wish") String wishId,
+    public DeferredResult<ResponseEntity<?>> reportWish(@RequestParam("wish") String wishId,
                                                      @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.WISH, wishId, userId);
     }
 
     @RequestMapping(value = "/offer", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportOffer(@RequestParam("offer") String offerId,
+    public DeferredResult<ResponseEntity<?>> reportOffer(@RequestParam("offer") String offerId,
                                                       @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.OFFER, offerId, userId);
     }
 
     @RequestMapping(value = "/story", method = RequestMethod.PUT)
-    public DeferredResult<ResponseEntity> reportStory(@RequestParam("story") String storyId,
+    public DeferredResult<ResponseEntity<?>> reportStory(@RequestParam("story") String storyId,
                                                       @RequestParam("user") String userId) {
         return reportService.report(ContentOrigin.STORY, storyId, userId);
     }

@@ -32,5 +32,6 @@ public class Wish {
     private Integer upvoteCount;
     private Integer reportCount;
 
+    @DBRef
     private Set<Offer> offers = new HashSet<>();
 }

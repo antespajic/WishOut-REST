@@ -1,6 +1,8 @@
 package hr.asc.appic.mapping;
 
+import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.elasticsearch.model.WishElasticModel;
 import hr.asc.appic.persistence.model.Wish;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,18 @@ public class WishMapper implements Mapper<Wish, WishModel> {
                 .setUpvoteCount(wish.getUpvoteCount())
                 .setReportCount(wish.getReportCount());
         return model;
+    }
+    
+    public WishElasticModel toElasticModel(Wish wish, UserLightViewModel creator) {
+    	return WishElasticModel.builder()
+    			.creator(creator)
+    			.created(String.valueOf(wish.getCreated().getTime()))
+    			.categories(wish.getCategories())
+    			.id(wish.getId())
+    			.title(wish.getTitle())
+    			.state(wish.getState())
+    			.upvoteCount(wish.getUpvoteCount())
+    			.description(wish.getDescription()).build();
     }
 
     public void updatePojoFromModel(Wish wish, WishModel model) {

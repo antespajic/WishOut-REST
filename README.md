@@ -263,7 +263,7 @@
 * **Data parameters:**
     ```json
     {
-        "storyId" : null,
+        "id" : null,
         "wishId" : 148842,
         "creatorId" : 15561,
         "sponsorId" : 27888,
@@ -278,7 +278,7 @@
     * **Content:**
         ```json
         {
-            "storyId" : 6731,
+            "id" : 6731,
             "wishId" : 148842,
             "creatorId" : 15561,
             "sponsorId" : 27888,
@@ -301,7 +301,7 @@
         ```json
         {
             "story" : {
-                "storyId" : 6731,
+                "id" : 6731,
                 "wishId" : 148842,
                 "creatorId" : 15561,
                 "sponsorId" : 27888,
@@ -386,7 +386,7 @@ Upvote functionality behaves the same accross resources that support upvoting. O
 Report functionality behaves the same accross resources that support reporting. Only difference is present in first query parameter which identifies specific resource on which report is being performed.
 * **Wish URL:** `/report?wish=:wishId&user=:userId`
 * **Offer URL:** `/report?offer=:offerId&user=:userId`
-* **Story URL:** `/report?story=:storyId&user=:userId`
+* **Story URL:** `/report?story=:id&user=:userId`
 * **Method:** `PUT`
 * **URL parameters:** `resourceId = String`, `userId = String`
 * **Data parameters:** not utilized here
@@ -445,7 +445,7 @@ Report functionality behaves the same accross resources that support reporting. 
         [
             {
                 "story" : {
-                    "storyId" : 6731,
+                    "id" : 6731,
                     "wishId" : 148842,
                     "creatorId" : 15561,
                     "sponsorId" : 27888,
@@ -520,7 +520,7 @@ Report functionality behaves the same accross resources that support reporting. 
             [
                 {
                     "story" : {
-                        "storyId" : 6731,
+                        "id" : 6731,
                         "wishId" : 148842,
                         "creatorId" : 15561,
                         "sponsorId" : 27888,
