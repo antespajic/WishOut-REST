@@ -9,7 +9,9 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import hr.asc.appic.controller.model.ImagePathModel;
 import hr.asc.appic.exception.ContentCheck;
 import hr.asc.appic.exception.ImageUploadException;
-import hr.asc.appic.service.RepoProvider;
+import hr.asc.appic.persistence.repository.StoryRepository;
+import hr.asc.appic.persistence.repository.UserRepository;
+import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,8 +33,13 @@ public class AmazonS3ImageService implements ImageService {
     private String bucket;
     @Autowired
     private AmazonS3 client;
+
     @Autowired
-    private RepoProvider repoProvider;
+    private UserRepository userRepository;
+    @Autowired
+    private WishRepository wishRepository;
+    @Autowired
+    private StoryRepository storyRepository;
 
     @Autowired
     private ImagePaths imagePaths;
@@ -41,7 +48,7 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.userRepository.findById(id).addCallback(
+        userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
@@ -58,14 +65,14 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.userRepository.findById(id).addCallback(
+        userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
                     String imagePath = imagePaths.uploadUrl(u);
                     uploadImage(imagePath, image);
                     String fullImagePath = imagePaths.accessUrl(imagePath);
                     u.setProfilePicture(fullImagePath);
-                    repoProvider.userRepository.save(u);
+                    userRepository.save(u);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
                 },
                 e -> {
@@ -80,13 +87,13 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity> deleteUserPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-        repoProvider.userRepository.findById(id).addCallback(
+        userRepository.findById(id).addCallback(
                 u -> {
                     ContentCheck.requireNonNull(id, u);
                     String deleteUrl = imagePaths.deleteUrl(u);
                     deleteImage(deleteUrl);
                     u.setProfilePicture(null);
-                    repoProvider.userRepository.save(u);
+                    userRepository.save(u);
                     result.setResult(ResponseEntity.ok().build());
                 },
                 e -> {
@@ -101,7 +108,7 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.wishRepository.findById(id).addCallback(
+        wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
@@ -118,14 +125,14 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> addWishPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.wishRepository.findById(id).addCallback(
+        wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
                     String imagePath = imagePaths.uploadUrl(w);
                     uploadImage(imagePath, image);
                     String fullImagePath = imagePaths.accessUrl(imagePath);
                     w.getPictures().add(fullImagePath);
-                    repoProvider.wishRepository.save(w);
+                    wishRepository.save(w);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
                 },
                 e -> {
@@ -140,7 +147,7 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.wishRepository.findById(id).addCallback(
+        wishRepository.findById(id).addCallback(
                 w -> {
                     ContentCheck.requireNonNull(id, w);
                     String deleteUrl = imagePaths.deleteUrl(w, imagePath);
@@ -153,7 +160,7 @@ public class AmazonS3ImageService implements ImageService {
                         result.setResult(ResponseEntity.badRequest().build());
                     }
 
-                    repoProvider.wishRepository.save(w);
+                    wishRepository.save(w);
                 },
                 e -> {
                     // TODO
@@ -167,7 +174,7 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> getStoryPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.storyRepository.findById(id).addCallback(
+        storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
@@ -184,14 +191,14 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> addStoryPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.storyRepository.findById(id).addCallback(
+        storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
                     String imagePath = imagePaths.uploadUrl(s);
                     uploadImage(imagePath, image);
                     String fullImagePath = imagePaths.accessUrl(imagePath);
                     s.getPictures().add(fullImagePath);
-                    repoProvider.storyRepository.save(s);
+                    storyRepository.save(s);
                     result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
                 },
                 e -> {
@@ -206,7 +213,7 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        repoProvider.storyRepository.findById(id).addCallback(
+        storyRepository.findById(id).addCallback(
                 s -> {
                     ContentCheck.requireNonNull(id, s);
                     String deleteUrl = imagePaths.deleteUrl(s, imagePath);
@@ -219,7 +226,7 @@ public class AmazonS3ImageService implements ImageService {
                         result.setResult(ResponseEntity.badRequest().build());
                     }
 
-                    repoProvider.storyRepository.save(s);
+                    storyRepository.save(s);
                 },
                 e -> {
                     // TODO

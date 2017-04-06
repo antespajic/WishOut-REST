@@ -21,6 +21,6 @@ public class OfferModel {
     private String description;
     private Date created;
     private Boolean chosen;
-    private String upvoteCount;
-    private String reportCount;
+    private Integer upvoteCount;
+    private Integer reportCount;
 }

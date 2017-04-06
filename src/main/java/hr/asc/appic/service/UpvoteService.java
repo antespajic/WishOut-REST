@@ -10,6 +10,7 @@ import hr.asc.appic.persistence.model.Wish;
 import hr.asc.appic.persistence.repository.OfferRepository;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
+import hr.asc.appic.service.utility.ContentOrigin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

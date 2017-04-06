@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WishMapper implements Mapper<Wish, WishModel> {
 
+    // Note: user needs to be set manually, since database
+    // needs to be queried to retrieve full User object.
     @Override
     public Wish modelToPojo(WishModel model) {
         Wish wish = new Wish();
@@ -52,8 +54,7 @@ public class WishMapper implements Mapper<Wish, WishModel> {
     			.description(wish.getDescription()).build();
     }
 
-    public void updatePojoFromModel(Wish wish, WishModel model) {
-
+    public void updateWishFromModel(Wish wish, WishModel model) {
         if (model.getTitle() != null) {
             wish.setTitle(model.getTitle());
         }
@@ -65,12 +66,6 @@ public class WishMapper implements Mapper<Wish, WishModel> {
         }
         if (model.getState() != null) {
             wish.setState(model.getState());
-        }
-        if (model.getUpvoteCount() != null) {
-            wish.setUpvoteCount(model.getUpvoteCount());
-        }
-        if (model.getReportCount() != null) {
-            wish.setReportCount(model.getReportCount());
         }
     }
 }

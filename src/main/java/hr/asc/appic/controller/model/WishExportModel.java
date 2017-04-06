@@ -16,7 +16,8 @@ public class WishExportModel {
 
     private UserLightViewModel creator;
     private WishModel wish;
-    private InteractionModel interaction;
+    private OfferExportModel chosenOffer;
     private OfferExportModel myOffer;
+    private InteractionModel interaction;
     private List<OfferExportModel> offers = new ArrayList<>();
 }

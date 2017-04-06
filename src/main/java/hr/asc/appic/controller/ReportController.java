@@ -1,6 +1,6 @@
 package hr.asc.appic.controller;
 
-import hr.asc.appic.service.ContentOrigin;
+import hr.asc.appic.service.utility.ContentOrigin;
 import hr.asc.appic.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

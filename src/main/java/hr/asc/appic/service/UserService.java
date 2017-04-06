@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,13 +31,13 @@ import java.util.stream.Collectors;
 public class UserService {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private ListeningExecutorService listeningExecutorService;
 
     @Autowired
-    private UserMapper map;
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserMapper userMapper;
     @Autowired
     private WishMapper wishMapper;
     @Autowired
@@ -47,44 +48,72 @@ public class UserService {
     public DeferredResult<ResponseEntity<UserModel>> createUser(UserModel model) {
         DeferredResult<ResponseEntity<UserModel>> result = new DeferredResult<>();
 
-        userRepository.save(map.modelToPojo(model)).addCallback(
-                response -> result.setResult(ResponseEntity.status(HttpStatus.OK).body(map.pojoToModel(response))),
-                error -> {
-                    result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                    log.error("Error while creating user", error);
-                });
+        ListenableFuture<UserModel> createUserJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.save(userMapper.modelToPojo(model)).get();
+                    return userMapper.pojoToModel(user);
+                }
+        );
+
+        Futures.addCallback(createUserJob, new FutureCallback<UserModel>() {
+
+            @Override
+            public void onSuccess(UserModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while creating user object", t);
+            }
+        });
+
         return result;
     }
 
     public DeferredResult<ResponseEntity<UserModel>> getUser(String id) {
         DeferredResult<ResponseEntity<UserModel>> result = new DeferredResult<>();
 
-        userRepository.findById(id).addCallback(
-                response -> {
-                    Assert.notNull(response, "Couldn't find a user with provided ID");
-                    result.setResult(ResponseEntity.ok(map.pojoToModel(response)));
-                },
-                e -> {
-                    result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                    log.error("Error while getting user", e);
-                });
+        ListenableFuture<UserModel> getUserJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.findById(id).get();
+                    Assert.notNull(user, "Could not find user with id: " + id);
+                    return userMapper.pojoToModel(user);
+                }
+        );
+
+        Futures.addCallback(getUserJob, new FutureCallback<UserModel>() {
+
+            @Override
+            public void onSuccess(UserModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while retrieving user object", t);
+            }
+        });
+
         return result;
     }
 
     public DeferredResult<ResponseEntity<?>> updateUser(String id, UserModel model) {
         DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
-        ListenableFuture<Void> getUser = listeningExecutorService.submit(
+        ListenableFuture<Void> updateUserJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
-                    Assert.notNull(user, "Couldn't find user with ID " + id);
-                    updateUserPartial(user, model);
+                    Assert.notNull(user, "Could not find user with id: " + id);
+                    userMapper.updateUserFromModel(user, model);
                     userRepository.save(user);
                     return null;
                 }
         );
 
-        Futures.addCallback(getUser, new FutureCallback<Void>() {
+        Futures.addCallback(updateUserJob, new FutureCallback<Void>() {
 
             @Override
             public void onSuccess(Void voidable) {
@@ -94,22 +123,10 @@ public class UserService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while updating user", t);
+                log.error("Error occurred while updating user object", t);
             }
         });
 
-        return result;
-    }
-
-    public DeferredResult<ResponseEntity<?>> deleteUser(String id) {
-        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
-
-        userRepository.delete(id).addCallback(
-                response -> result.setResult(ResponseEntity.ok().build()),
-                error -> {
-                    result.setResult(ResponseEntity.badRequest().build());
-                    log.error("Error during deleting user", error);
-                });
         return result;
     }
 
@@ -119,8 +136,9 @@ public class UserService {
         ListenableFuture<Collection<WishModel>> getWishesJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
-                    Assert.notNull(user, "Couldn't find user with ID " + id);
+                    Assert.notNull(user, "Could not find user with id: " + id);
                     return user.getWishes().stream()
+                            .sorted(Comparator.reverseOrder())
                             .map(wishMapper::pojoToModel)
                             .collect(Collectors.toList());
                 }
@@ -136,7 +154,7 @@ public class UserService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while retrieving user wishes", t);
+                log.error("Error occurred while retrieving user's wishes", t);
             }
         });
 
@@ -149,8 +167,9 @@ public class UserService {
         ListenableFuture<Collection<StoryModel>> getStoriesJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
-                    Assert.notNull(user, "Couldn't find user with ID " + id);
+                    Assert.notNull(user, "Could not find user with id: " + id);
                     return user.getStories().stream()
+                            .sorted(Comparator.reverseOrder())
                             .map(storyMapper::pojoToModel)
                             .collect(Collectors.toList());
                 }
@@ -166,7 +185,7 @@ public class UserService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while retrieving user stories", t);
+                log.error("Error occurred while retrieving user's stories", t);
             }
         });
 
@@ -179,8 +198,9 @@ public class UserService {
         ListenableFuture<Collection<OfferModel>> getOffersJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
-                    Assert.notNull(user, "Couldn't find user with ID " + id);
+                    Assert.notNull(user, "Could not find user with id: " + id);
                     return user.getOffers().stream()
+                            .sorted(Comparator.reverseOrder())
                             .map(offerMapper::pojoToModel)
                             .collect(Collectors.toList());
                 }
@@ -196,43 +216,10 @@ public class UserService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while retrieving user offers", t);
+                log.error("Error occurred while retrieving user's offers", t);
             }
         });
 
         return result;
-    }
-
-    private void updateUserPartial(User user, UserModel viewModel) {
-        if (viewModel.getFirstName() != null) {
-            user.setFirstName(viewModel.getFirstName());
-        }
-        if (viewModel.getLastName() != null) {
-            user.setLastName(viewModel.getLastName());
-        }
-        if (viewModel.getCountry() != null) {
-            user.setCountry(viewModel.getCountry());
-        }
-        if (viewModel.getCity() != null) {
-            user.setCity(viewModel.getCity());
-        }
-        if (viewModel.getGender() != null) {
-            user.setGender(viewModel.getGender());
-        }
-        if (viewModel.getDateOfBirth() != null) {
-            user.setDateOfBirth(viewModel.getDateOfBirth());
-        }
-        if (viewModel.getContactNumber() != null) {
-            user.setContactNumber(viewModel.getContactNumber());
-        }
-        if (viewModel.getContactFacebook() != null) {
-            user.setContactFacebook(viewModel.getContactFacebook());
-        }
-        if (viewModel.getProfileConfirmed() != null) {
-            user.setProfileConfirmed(viewModel.getProfileConfirmed());
-        }
-        if (viewModel.getCoins() != null) {
-            user.setCoins(viewModel.getCoins());
-        }
     }
 }

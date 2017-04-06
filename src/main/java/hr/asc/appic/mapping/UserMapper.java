@@ -12,20 +12,21 @@ public class UserMapper implements Mapper<User, UserModel> {
     @Override
     public User modelToPojo(UserModel model) {
         return new User()
+                .setId(model.getId())
                 .setEmail(model.getEmail())
+                .setPassword(model.getPassword())
                 .setFirstName(model.getFirstName())
                 .setLastName(model.getLastName())
-                .setContactNumber(model.getContactNumber())
-                .setContactFacebook(model.getContactFacebook())
-                .setCountry(model.getCountry())
                 .setCity(model.getCity())
-                .setProfilePicture(model.getProfilePicture())
+                .setCountry(model.getCountry())
+                .setGender(model.getGender())
                 .setDateOfBirth(model.getDateOfBirth())
                 .setDateOfRegistration(model.getDateOfRegistration())
+                .setProfilePicture(model.getProfilePicture())
+                .setContactNumber(model.getContactNumber())
+                .setContactFacebook(model.getContactFacebook())
                 .setProfileConfirmed(model.getProfileConfirmed())
-                .setGender(model.getGender())
-                .setCoins(model.getCoins())
-                .setPassword(model.getPassword());
+                .setCoins(model.getCoins());
     }
 
     @Override
@@ -33,19 +34,19 @@ public class UserMapper implements Mapper<User, UserModel> {
         return new UserModel()
                 .setId(pojo.getId())
                 .setEmail(pojo.getEmail())
+                .setPassword(pojo.getPassword())
                 .setFirstName(pojo.getFirstName())
                 .setLastName(pojo.getLastName())
-                .setContactNumber(pojo.getContactNumber())
-                .setContactFacebook(pojo.getContactFacebook())
-                .setCountry(pojo.getCountry())
                 .setCity(pojo.getCity())
-                .setProfilePicture(pojo.getProfilePicture())
+                .setCountry(pojo.getCountry())
+                .setGender(pojo.getGender())
                 .setDateOfBirth(pojo.getDateOfBirth())
                 .setDateOfRegistration(pojo.getDateOfRegistration())
+                .setProfilePicture(pojo.getProfilePicture())
+                .setContactNumber(pojo.getContactNumber())
+                .setContactFacebook(pojo.getContactFacebook())
                 .setProfileConfirmed(pojo.getProfileConfirmed())
-                .setGender(pojo.getGender())
-                .setCoins(pojo.getCoins())
-                .setPassword(pojo.getPassword());
+                .setCoins(pojo.getCoins());
     }
 
     public UserLightViewModel lightModelFromUser(User user) {
@@ -62,4 +63,36 @@ public class UserMapper implements Mapper<User, UserModel> {
                 .setReported(user.getReports().contains(resource));
     }
 
+    public void updateUserFromModel(User user, UserModel viewModel) {
+        if (viewModel.getFirstName() != null) {
+            user.setFirstName(viewModel.getFirstName());
+        }
+        if (viewModel.getLastName() != null) {
+            user.setLastName(viewModel.getLastName());
+        }
+        if (viewModel.getCountry() != null) {
+            user.setCountry(viewModel.getCountry());
+        }
+        if (viewModel.getCity() != null) {
+            user.setCity(viewModel.getCity());
+        }
+        if (viewModel.getGender() != null) {
+            user.setGender(viewModel.getGender());
+        }
+        if (viewModel.getDateOfBirth() != null) {
+            user.setDateOfBirth(viewModel.getDateOfBirth());
+        }
+        if (viewModel.getContactNumber() != null) {
+            user.setContactNumber(viewModel.getContactNumber());
+        }
+        if (viewModel.getContactFacebook() != null) {
+            user.setContactFacebook(viewModel.getContactFacebook());
+        }
+        if (viewModel.getProfileConfirmed() != null) {
+            user.setProfileConfirmed(viewModel.getProfileConfirmed());
+        }
+        if (viewModel.getCoins() != null) {
+            user.setCoins(viewModel.getCoins());
+        }
+    }
 }
