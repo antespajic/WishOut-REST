@@ -17,6 +17,15 @@ public class WishController {
     private WishService wishService;
 
     @RequestMapping(
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity<WishModel>> createWish(@RequestBody WishModel model) {
+        return wishService.createWish(model);
+    }
+
+    @RequestMapping(
             value = "/{id}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -24,16 +33,7 @@ public class WishController {
     public DeferredResult<ResponseEntity<WishExportModel>> getWish(@PathVariable("id") String id,
                                                                    @RequestParam("index") Integer index,
                                                                    @RequestParam("size") Integer size) {
-        return wishService.getWish(index, size, id);
-    }
-
-    @RequestMapping(
-            method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public DeferredResult<ResponseEntity<WishModel>> createWish(@RequestBody WishModel model) {
-        return wishService.createWish(model);
+        return wishService.getWish(id, index, size);
     }
 
     @RequestMapping(
@@ -48,17 +48,11 @@ public class WishController {
 
     @RequestMapping(
             value = "/{wishId}/{offerId}",
-            method = RequestMethod.PUT,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            method = RequestMethod.PUT
     )
     public DeferredResult<ResponseEntity> assignOffer(@PathVariable("wishId") String wishId,
                                                       @PathVariable("offerId") String offerId,
                                                       @RequestParam("confirmed") boolean confirmed) {
-        return wishService.assignOffer(wishId, offerId, confirmed);
-    }
-
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public DeferredResult deleteWish(@PathVariable("id") String id) {
-        return wishService.deleteWish(id);
+        return wishService.updateOffer(wishId, offerId, confirmed);
     }
 }

@@ -1,87 +1,80 @@
 package hr.asc.appic.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.async.DeferredResult;
-
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-
 import hr.asc.appic.controller.model.OfferModel;
-import hr.asc.appic.exception.ContentCheck;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.model.Wish;
+import hr.asc.appic.persistence.repository.OfferRepository;
+import hr.asc.appic.persistence.repository.UserRepository;
+import hr.asc.appic.persistence.repository.WishRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.DeferredResult;
 
+@Slf4j
 @Service
 public class OfferService {
 
     @Autowired
     private ListeningExecutorService listeningExecutorService;
+
     @Autowired
-    private RepoProvider repoProvider;
+    private UserRepository userRepository;
     @Autowired
-    private OfferMapper mapper;
+    private WishRepository wishRepository;
+    @Autowired
+    private OfferRepository offerRepository;
 
-    public DeferredResult<ResponseEntity> getOffer(String id) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    @Autowired
+    private OfferMapper offerMapper;
 
-        ListenableFuture<OfferModel> getOffer = listeningExecutorService.submit(
-                () -> {
-                    Offer offer = repoProvider.offerRepository.findById(id).get();
-                    ContentCheck.requireNonNull(id, offer);
-                    return mapper.pojoToModel(offer);
-                }
-        );
-
-        Futures.addCallback(getOffer, new ResponseEntityCallback<>(result));
-        return result;
-    }
-
-    public DeferredResult<ResponseEntity> createOffer(OfferModel model) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<OfferModel>> createOffer(OfferModel model) {
+        DeferredResult<ResponseEntity<OfferModel>> result = new DeferredResult<>();
 
         ListenableFuture<OfferModel> createOfferJob = listeningExecutorService.submit(
                 () -> {
-                    Offer offer = mapper.modelToPojo(model);
+                    Offer offer = offerMapper.modelToPojo(model);
 
-                    User user = repoProvider.userRepository.findById(model.getUserId()).get();
-                    ContentCheck.requireNonNull(model.getUserId(), user);
+                    User user = userRepository.findById(model.getUserId()).get();
+                    Assert.notNull(user, "Could not find user with id: " + model.getUserId());
 
-                    Wish wish = repoProvider.wishRepository.findById(model.getWishId()).get();
-                    ContentCheck.requireNonNull(model.getWishId(), wish);
+                    Wish wish = wishRepository.findById(model.getWishId()).get();
+                    Assert.notNull(wish, "Could not find wish with id: " + model.getWishId());
 
-                    offer.setUserId(user.getId());
-                    offer.setWishId(wish.getId());
                     user.getOffers().add(offer);
                     wish.getOffers().add(offer);
 
-                    repoProvider.userRepository.save(user);
-                    repoProvider.wishRepository.save(wish);
-                    repoProvider.offerRepository.save(offer);
+                    offerRepository.save(offer);
+                    userRepository.save(user);
+                    wishRepository.save(wish);
 
-                    return mapper.pojoToModel(offer);
+                    return offerMapper.pojoToModel(offer);
                 }
         );
 
-        Futures.addCallback(createOfferJob, new ResponseEntityCallback<>(result));
-        return result;
-    }
+        Futures.addCallback(createOfferJob, new FutureCallback<OfferModel>() {
 
-    public DeferredResult<ResponseEntity> deleteOffer(String id) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+            @Override
+            public void onSuccess(OfferModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
 
-        ListenableFuture<Void> deleteOfferJob = listeningExecutorService.submit(
-                () -> {
-                    repoProvider.offerRepository.delete(id);
-                    return null;
-                }
-        );
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while creating offer object", t);
+            }
+        });
 
-        Futures.addCallback(deleteOfferJob, new ResponseEntityCallback<>(result));
         return result;
     }
 }

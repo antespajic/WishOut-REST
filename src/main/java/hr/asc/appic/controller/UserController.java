@@ -41,20 +41,11 @@ public class UserController {
     @RequestMapping(
             value = "/{id}",
             method = RequestMethod.PUT,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity> updateUser(@PathVariable String id,
                                                      @RequestBody UserModel viewModel) {
         return userService.updateUser(id, viewModel);
-    }
-
-    @RequestMapping(
-            value = "/{id}",
-            method = RequestMethod.DELETE
-    )
-    public DeferredResult<ResponseEntity> deleteUser(@PathVariable String id) {
-        return userService.deleteUser(id);
     }
 
     @RequestMapping(

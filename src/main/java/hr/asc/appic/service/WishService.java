@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import hr.asc.appic.controller.model.OfferExportModel;
 import hr.asc.appic.controller.model.WishExportModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.mapping.OfferMapper;
@@ -59,7 +58,7 @@ public class WishService {
                 () -> {
                     Wish wish = wishMapper.modelToPojo(model);
                     User user = userRepository.findById(model.getUserId()).get();
-                    Assert.notNull(user, "Could not find user for id: " + model.getUserId());
+                    Assert.notNull(user, "Could not find user with id: " + model.getUserId());
 
                     wish.setUser(user);
                     user.getWishes().add(wish);
@@ -81,21 +80,21 @@ public class WishService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while creating wish", t);
+                log.error("Error occurred while creating wish object", t);
             }
         });
 
         return result;
     }
 
-    public DeferredResult<ResponseEntity<WishExportModel>> getWish(Integer index, Integer size, String id) {
+    public DeferredResult<ResponseEntity<WishExportModel>> getWish(String id, Integer index, Integer size) {
         DeferredResult<ResponseEntity<WishExportModel>> result = new DeferredResult<>();
 
         ListenableFuture<WishExportModel> getWishJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
-                    Assert.notNull(wish, "Could not find wish for id: " + id);
-                    return exportWish(index, size, wish);
+                    Assert.notNull(wish, "Could not find wish with id: " + id);
+                    return exportWish(wish, index, size);
                 }
         );
 
@@ -109,7 +108,7 @@ public class WishService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while retrieving wish", t);
+                log.error("Error occurred while retrieving wish object", t);
             }
         });
 
@@ -123,7 +122,7 @@ public class WishService {
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
-                    wishMapper.updatePojoFromModel(wish, model);
+                    wishMapper.updateWishFromModel(wish, model);
                     wishRepository.save(wish);
                     return null;
                 }
@@ -139,24 +138,24 @@ public class WishService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while updating wish", t);
+                log.error("Error occurred while updating wish object", t);
             }
         });
 
         return result;
     }
 
-    public DeferredResult<ResponseEntity> assignOffer(String wishId, String offerId, boolean confirmed) {
+    public DeferredResult<ResponseEntity> updateOffer(String wishId, String offerId, boolean confirmed) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-        ListenableFuture<Void> assignJob = listeningExecutorService.submit(
+        ListenableFuture<Void> updateOfferForWishJob = listeningExecutorService.submit(
                 () -> {
-                    assignOfferToWish(wishId, offerId, confirmed);
+                    updateOfferForWish(wishId, offerId, confirmed);
                     return null;
                 }
         );
 
-        Futures.addCallback(assignJob, new FutureCallback<Void>() {
+        Futures.addCallback(updateOfferForWishJob, new FutureCallback<Void>() {
 
             @Override
             public void onSuccess(Void voidable) {
@@ -166,49 +165,56 @@ public class WishService {
             @Override
             public void onFailure(Throwable t) {
                 result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error while assigning offer to wish", t);
+                log.error("Error occurred while assigning offer to wish", t);
             }
         });
 
         return result;
     }
 
-    public DeferredResult<ResponseEntity> deleteWish(String id) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    private WishExportModel exportWish(Wish wish, Integer index, Integer size) throws Exception {
+        User creator = userRepository.findById(wish.getUser().getId()).get();
+        Assert.notNull(creator, "Could not find user with id: " + wish.getUser().getId());
 
-        ListenableFuture<Void> deleteJob = listeningExecutorService.submit(
-                () -> {
-                    Wish wish = wishRepository.findById(id).get();
-                    Assert.notNull(wish, "Could not find wish for id: " + id);
-                    User user = userRepository.findById(wish.getUser().getId()).get();
+        List<Offer> chosenOffers = offerRepository.findByWishIdAndChosen(wish.getId(), true);
+        int chosenSize = chosenOffers.size();
+        Assert.isTrue(chosenSize == 0 || chosenSize == 1,
+                "Invalid number of accepted offers for wish.");
 
-                    user.getWishes().remove(wish);
-                    userRepository.save(user);
-                    wishRepository.delete(id);
-                    return null;
-                }
-        );
+        Pageable page = new PageRequest(index, size, new Sort(Sort.Direction.DESC, UPVOTE_COUNT_COLUMN));
+        List<Offer> allOffers = offerRepository.findByWishId(wish.getId(), page);
 
-        Futures.addCallback(deleteJob, new FutureCallback<Void>() {
+        WishExportModel wishExportModel = new WishExportModel();
+        wishExportModel.setCreator(userMapper.lightModelFromUser(creator));
+        wishExportModel.setWish(wishMapper.pojoToModel(wish));
 
-            @Override
-            public void onSuccess(Void voidable) {
-                result.setResult(ResponseEntity.ok().build());
-            }
+        // Setting chosen offer, if such is present.
+        if (chosenSize == 1) {
+            Offer chosenOffer = chosenOffers.get(0);
+            User chosenUser = userRepository.findById(chosenOffer.getUserId()).get();
+            Assert.notNull(chosenUser, "Could not find chosen user with id: " + chosenOffer.getUserId());
+            wishExportModel.setChosenOffer(offerMapper.exportModelForUser(chosenOffer, chosenUser));
+            // In the future, interaction needs to be implemented.
+        }
 
-            @Override
-            public void onFailure(Throwable t) {
-                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
-                log.error("Error occurred during wish deletion", t);
-            }
-        });
+        // In the future, myOffer needs to be implemented.
+        // In the future, interaction needs to be implemented.
 
-        return result;
+        for (Offer offer : allOffers) {
+            User user = userRepository.findById(offer.getUserId()).get();
+            Assert.notNull(user, "Could not find offer user with id: " + offer.getUserId());
+
+            wishExportModel.getOffers().add(offerMapper.exportModelForUser(offer, user));
+            // In the future, interaction needs to be implemented.
+        }
+
+        return wishExportModel;
     }
 
-    private void assignOfferToWish(String wishId, String offerId, boolean confirmed) throws Exception {
+    private void updateOfferForWish(String wishId, String offerId, boolean confirmed) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
         Assert.notNull(wish, "Could not find wish with id: " + wishId);
+
         Offer offer = offerRepository.findById(offerId).get();
         Assert.notNull(offer, "Could not find offer with id: " + offerId);
 
@@ -217,41 +223,14 @@ public class WishService {
         }
 
         if (confirmed) {
-            for (Offer o : wish.getOffers()) {
-                if (o.getChosen()) {
-                    throw new IllegalArgumentException("Wish already has offer specified as chosen.");
+            for (Offer wishOffer : wish.getOffers()) {
+                if (wishOffer.getChosen()) {
+                    throw new IllegalArgumentException("Wish already has offer set as chosen one.");
                 }
             }
         }
 
         offer.setChosen(confirmed);
         offerRepository.save(offer);
-    }
-
-    private WishExportModel exportWish(Integer index, Integer size, Wish wish) throws Exception {
-        Pageable page = new PageRequest(index, size, new Sort(Sort.Direction.DESC, UPVOTE_COUNT_COLUMN));
-
-        List<Offer> offers = offerRepository.findByWishId(wish.getId(), page);
-        User creator = userRepository.findById(wish.getUser().getId()).get();
-        Assert.notNull(creator, "Could not find user for id: " + wish.getUser().getId());
-
-        WishExportModel wishExportModel = new WishExportModel();
-        wishExportModel.setCreator(userMapper.lightModelFromUser(creator));
-        wishExportModel.setWish(wishMapper.pojoToModel(wish));
-        wishExportModel.setInteraction(userMapper.interactionModelForUser(creator, wish.getId()));
-
-        for (Offer offer : offers) {
-            User user = userRepository.findById(offer.getUserId()).get();
-            Assert.notNull(user, "Could not find user for id: " + offer.getUserId());
-
-            OfferExportModel offerExportModel = new OfferExportModel();
-            offerExportModel.setOffer(offerMapper.pojoToModel(offer));
-            offerExportModel.setUser(userMapper.lightModelFromUser(user));
-            offerExportModel.setInteraction(userMapper.interactionModelForUser(user, offer.getId()));
-
-            wishExportModel.getOffers().add(offerExportModel);
-        }
-
-        return wishExportModel;
     }
 }

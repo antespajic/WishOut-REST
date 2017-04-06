@@ -17,7 +17,7 @@ import java.util.*;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Wish {
+public class Wish implements Comparable<Wish> {
 
     @Id
     private String id;
@@ -34,4 +34,13 @@ public class Wish {
 
     @DBRef
     private Set<Offer> offers = new HashSet<>();
+
+    @Override
+    public int compareTo(Wish wish) {
+        int result = created.compareTo(wish.created);
+        if (result == 0) {
+            result = upvoteCount.compareTo(wish.upvoteCount);
+        }
+        return result;
+    }
 }

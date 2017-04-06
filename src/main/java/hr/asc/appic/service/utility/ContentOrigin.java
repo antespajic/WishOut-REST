@@ -1,4 +1,4 @@
-package hr.asc.appic.service;
+package hr.asc.appic.service.utility;
 
 public enum ContentOrigin {
 

@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Story {
+public class Story implements Comparable<Story> {
 
     @Id
     @Setter(value = AccessLevel.NONE)
@@ -37,4 +37,9 @@ public class Story {
     private List<String> pictures = new LinkedList<>();
 
     private Integer reportCount;
+
+    @Override
+    public int compareTo(Story story) {
+        return created.compareTo(story.created);
+    }
 }

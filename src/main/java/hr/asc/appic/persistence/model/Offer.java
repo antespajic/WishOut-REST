@@ -1,15 +1,14 @@
 package hr.asc.appic.persistence.model;
 
-import java.util.Date;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
 
 @Document
 @Getter
@@ -17,7 +16,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Accessors(chain = true)
-public class Offer {
+public class Offer implements Comparable<Offer> {
 
     @Id
     private String id;
@@ -26,6 +25,15 @@ public class Offer {
     private String description;
     private Date created;
     private Boolean chosen;
-    private String upvoteCount;
-    private String reportCount;
+    private Integer upvoteCount;
+    private Integer reportCount;
+
+    @Override
+    public int compareTo(Offer offer) {
+        int result = created.compareTo(offer.created);
+        if (result == 0) {
+            result = upvoteCount.compareTo(offer.upvoteCount);
+        }
+        return result;
+    }
 }
