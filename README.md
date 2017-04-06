@@ -302,7 +302,7 @@
             "interaction" : {
                 "upvoted" : true,
                 "reported" : false
-            }
+            },
             "offers" :    [
                 {
                     "user" :  {
