@@ -132,7 +132,7 @@ public class WishService {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
 
-                    wishMapper.updateWishFromModel(wish, model);
+                    wishMapper.updatePojoFromModel(wish, model);
                     wish = wishRepository.save(wish).get();
 
                     wishElasticRepository.save(

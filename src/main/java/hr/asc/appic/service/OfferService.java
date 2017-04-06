@@ -77,4 +77,36 @@ public class OfferService {
 
         return result;
     }
+
+    public DeferredResult<ResponseEntity> updateOffer(String id, OfferModel model) {
+        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+
+        ListenableFuture<Void> updateOfferJob = listeningExecutorService.submit(
+                () -> {
+                    Offer offer = offerRepository.findById(id).get();
+                    Assert.notNull(offer, "Could not find offer with id: " + id);
+
+                    offerMapper.updatePojoFromModel(offer, model);
+                    offerRepository.save(offer);
+
+                    return null;
+                }
+        );
+
+        Futures.addCallback(updateOfferJob, new FutureCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void voidable) {
+                result.setResult(ResponseEntity.ok().build());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while updating offer object", t);
+            }
+        });
+
+        return result;
+    }
 }

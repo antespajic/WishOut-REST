@@ -39,6 +39,13 @@ public class OfferMapper implements Mapper<Offer, OfferModel> {
                 .setReportCount(offer.getReportCount());
     }
 
+    @Override
+    public void updatePojoFromModel(Offer offer, OfferModel model) {
+        if (model.getDescription() != null) {
+            offer.setDescription(model.getDescription());
+        }
+    }
+
     public OfferExportModel exportModelForUser(Offer offer, User user) {
         return new OfferExportModel()
                 .setUser(userMapper.lightModelFromUser(user))
