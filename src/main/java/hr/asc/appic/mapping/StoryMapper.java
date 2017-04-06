@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserLightViewModel;
+import hr.asc.appic.elasticsearch.model.StoryElasticModel;
 import hr.asc.appic.persistence.model.Story;
 
 @Service
@@ -39,6 +40,16 @@ public class StoryMapper implements Mapper<Story, StoryModel> {
 				.setStory(story)
 				.setCreator(creator)
 				.setSponsor(sponsor);
+	}
+	
+	public StoryElasticModel toElasticModel(Story story, UserLightViewModel creator, UserLightViewModel sponsor) {
+		return StoryElasticModel.builder()
+		.creator(creator)
+		.sponsor(sponsor)
+		.created(String.valueOf(story.getCreated().getTime()))
+		.description(story.getDescription())
+		.id(story.getId())
+		.pictures(story.getPictures()).build();
 	}
 
 }

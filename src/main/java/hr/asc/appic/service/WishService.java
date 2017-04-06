@@ -6,6 +6,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import hr.asc.appic.controller.model.WishExportModel;
 import hr.asc.appic.controller.model.WishModel;
+import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.mapping.UserMapper;
 import hr.asc.appic.mapping.WishMapper;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,8 @@ public class WishService {
     @Autowired
     private WishRepository wishRepository;
     @Autowired
+    private WishElasticRepository wishElasticRepository;
+    @Autowired
     private OfferRepository offerRepository;
 
     @Autowired
@@ -51,9 +55,11 @@ public class WishService {
     @Autowired
     private OfferMapper offerMapper;
 
+    @Autowired
+    ElasticsearchTemplate elasticsearchTemplate;
+
     public DeferredResult<ResponseEntity<WishModel>> createWish(WishModel model) {
         DeferredResult<ResponseEntity<WishModel>> result = new DeferredResult<>();
-
         ListenableFuture<WishModel> createWishJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishMapper.modelToPojo(model);
@@ -61,11 +67,14 @@ public class WishService {
                     Assert.notNull(user, "Could not find user with id: " + model.getUserId());
 
                     wish.setUser(user);
+                    wish = wishRepository.save(wish).get();
+
                     user.getWishes().add(wish);
+                    user = userRepository.save(user).get();
 
-                    wishRepository.save(wish);
-                    userRepository.save(user);
-
+                    wishElasticRepository.save(
+                            wishMapper.toElasticModel(wish, userMapper.lightModelFromUser(user))
+                    );
                     return wishMapper.pojoToModel(wish);
                 }
         );
@@ -115,15 +124,22 @@ public class WishService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> updateWish(String id, WishModel model) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<?>> updateWish(String id, WishModel model) {
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         ListenableFuture<Void> updateWishJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
+
                     wishMapper.updateWishFromModel(wish, model);
-                    wishRepository.save(wish);
+                    wish = wishRepository.save(wish).get();
+
+                    wishElasticRepository.save(
+                            wishMapper.toElasticModel(
+                                    wish, userMapper.lightModelFromUser(wish.getUser())
+                            )
+                    );
                     return null;
                 }
         );

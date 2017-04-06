@@ -2,6 +2,9 @@ package hr.asc.appic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+
+import com.github.vanroy.springdata.jest.JestElasticsearchTemplate;
 
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -21,4 +24,9 @@ public class ElasticSearchConfiguration {
 		JestClient client = factory.getObject();
 		return client;
 	}
+	
+	@Bean
+    public ElasticsearchOperations elasticsearchTemplate() throws Exception {
+        return new JestElasticsearchTemplate(jestClient());
+    }
 }

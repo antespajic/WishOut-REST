@@ -1,4 +1,4 @@
-package hr.asc.appic.persistence.model;
+	package hr.asc.appic.persistence.model;
 
 import lombok.*;
 import lombok.experimental.Accessors;

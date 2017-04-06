@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserLightViewModel;
+import hr.asc.appic.elasticsearch.repository.StoryElasticRepository;
 import hr.asc.appic.mapping.StoryMapper;
 import hr.asc.appic.mapping.UserMapper;
 import hr.asc.appic.persistence.model.Story;
@@ -27,20 +28,15 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Service
 public class StoryService {
 
-    @Autowired
-    private ListeningExecutorService listeningExecutorService;
+    @Autowired private ListeningExecutorService listeningExecutorService;
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private WishRepository wishRepository;
-    @Autowired
-    private StoryRepository storyRepository;
-
-    @Autowired
-    private StoryMapper map;
-    @Autowired
-    private UserMapper userMapper;
+    @Autowired private UserRepository userRepository;
+    @Autowired private WishRepository wishRepository;
+    @Autowired private StoryRepository storyRepository;
+    @Autowired private StoryElasticRepository storyElasticRepository;
+    
+    @Autowired private StoryMapper map;
+    @Autowired private UserMapper userMapper;
 
     public DeferredResult<ResponseEntity<StoryModel>> create(StoryModel svm) {
         DeferredResult<ResponseEntity<StoryModel>> res = new DeferredResult<>();
@@ -58,7 +54,11 @@ public class StoryService {
                                     .setSponsor(s);
 
                             Story stori = storyRepository.save(st).get();
-
+                            storyElasticRepository.save(map.toElasticModel(
+                            		stori,
+                            		userMapper.lightModelFromUser(u),
+                            		userMapper.lightModelFromUser(s))
+                            		);
                             return ResponseEntity.ok(map.pojoToModel(stori));
                         }
                 );
@@ -99,6 +99,7 @@ public class StoryService {
 
     public DeferredResult<ResponseEntity<?>> delete(String id) {
         DeferredResult<ResponseEntity<?>> res = new DeferredResult<>();
+        storyElasticRepository.delete(id);
         storyRepository.delete(id).addCallback(
                 response -> res.setResult(ResponseEntity.ok().build()),
                 error -> {

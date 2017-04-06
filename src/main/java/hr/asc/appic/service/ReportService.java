@@ -38,10 +38,10 @@ public class ReportService {
     @Autowired
     private StoryRepository storyRepository;
 
-    public DeferredResult<ResponseEntity> report(ContentOrigin origin,
+    public DeferredResult<ResponseEntity<?>> report(ContentOrigin origin,
                                                  String resourceId,
                                                  String userId) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         ListenableFuture<Void> reportJob = listeningExecutorService.submit(
                 () -> {

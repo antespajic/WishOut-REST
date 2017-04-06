@@ -100,8 +100,8 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity> updateUser(String id, UserModel model) {
-        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<?>> updateUser(String id, UserModel model) {
+        DeferredResult<ResponseEntity<?>> result = new DeferredResult<>();
 
         ListenableFuture<Void> updateUserJob = listeningExecutorService.submit(
                 () -> {

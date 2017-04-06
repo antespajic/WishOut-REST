@@ -43,8 +43,8 @@ public class UserController {
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity> updateUser(@PathVariable String id,
-                                                     @RequestBody UserModel viewModel) {
+    public DeferredResult<ResponseEntity<?>> updateUser(@PathVariable String id,
+                                                        @RequestBody UserModel viewModel) {
         return userService.updateUser(id, viewModel);
     }
 
