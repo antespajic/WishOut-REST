@@ -6,17 +6,25 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import hr.asc.appic.controller.model.ImagePathModel;
-import hr.asc.appic.exception.ContentCheck;
 import hr.asc.appic.exception.ImageUploadException;
+import hr.asc.appic.persistence.model.Story;
+import hr.asc.appic.persistence.model.User;
+import hr.asc.appic.persistence.model.Wish;
 import hr.asc.appic.persistence.repository.StoryRepository;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +43,9 @@ public class AmazonS3ImageService implements ImageService {
     private AmazonS3 client;
 
     @Autowired
+    private ListeningExecutorService listeningExecutorService;
+
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private WishRepository wishRepository;
@@ -44,20 +55,21 @@ public class AmazonS3ImageService implements ImageService {
     @Autowired
     private ImagePaths imagePaths;
 
+    // ======================================== User ======================================== //
+
     @Override
     public DeferredResult<ResponseEntity<ImagePathModel>> getUserPhoto(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        userRepository.findById(id).addCallback(
-                u -> {
-                    ContentCheck.requireNonNull(id, u);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
-                },
-                e -> {
-                    // TODO
+        ListenableFuture<ImagePathModel> getUserPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.findById(id).get();
+                    Assert.notNull(user, "Could not find user with id: " + id);
+                    return new ImagePathModel(id, user.getProfilePicture());
                 }
         );
 
+        submitImageJob(getUserPhotoJob, result);
         return result;
     }
 
@@ -65,59 +77,77 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        userRepository.findById(id).addCallback(
-                u -> {
-                    ContentCheck.requireNonNull(id, u);
-                    String imagePath = imagePaths.uploadUrl(u);
+        ListenableFuture<ImagePathModel> setUserPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.findById(id).get();
+                    Assert.notNull(user, "Could not find user with id: " + id);
+
+                    if (user.getProfilePicture() != null) {
+                        deleteImage(imagePaths.deleteUrl(user));
+                    }
+
+                    String imagePath = imagePaths.uploadUrl(user);
                     uploadImage(imagePath, image);
+
                     String fullImagePath = imagePaths.accessUrl(imagePath);
-                    u.setProfilePicture(fullImagePath);
-                    userRepository.save(u);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, u.getProfilePicture())));
-                },
-                e -> {
-                    // TODO
+                    user.setProfilePicture(fullImagePath);
+                    userRepository.save(user);
+
+                    return new ImagePathModel(id, user.getProfilePicture());
                 }
         );
 
+        submitImageJob(setUserPhotoJob, result);
         return result;
     }
 
     @Override
-    public DeferredResult<ResponseEntity> deleteUserPhoto(String id, String imagePath) {
+    public DeferredResult<ResponseEntity> deleteUserPhoto(String id) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 
-        userRepository.findById(id).addCallback(
-                u -> {
-                    ContentCheck.requireNonNull(id, u);
-                    String deleteUrl = imagePaths.deleteUrl(u);
-                    deleteImage(deleteUrl);
-                    u.setProfilePicture(null);
-                    userRepository.save(u);
-                    result.setResult(ResponseEntity.ok().build());
-                },
-                e -> {
-                    // TODO
+        ListenableFuture<Void> deleteUserPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.findById(id).get();
+                    Assert.notNull(user, "Could not find user with id: " + id);
+                    deleteImage(imagePaths.deleteUrl(user));
+                    user.setProfilePicture(null);
+                    userRepository.save(user);
+                    return null;
                 }
         );
 
+        Futures.addCallback(deleteUserPhotoJob, new FutureCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void voidable) {
+                result.setResult(ResponseEntity.ok().build());
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred during image manipulation", throwable);
+            }
+        });
+
         return result;
     }
+
+    // ======================================== Wish ======================================== //
 
     @Override
     public DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        wishRepository.findById(id).addCallback(
-                w -> {
-                    ContentCheck.requireNonNull(id, w);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
-                },
-                e -> {
-                    // TODO
+        ListenableFuture<ImagePathModel> getWishPhotosJob = listeningExecutorService.submit(
+                () -> {
+                    Wish wish = wishRepository.findById(id).get();
+                    Assert.notNull(wish, "Could not find wish with id: " + id);
+                    return new ImagePathModel(id, wish.getPictures());
                 }
         );
 
+        submitImageJob(getWishPhotosJob, result);
         return result;
     }
 
@@ -125,21 +155,23 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> addWishPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        wishRepository.findById(id).addCallback(
-                w -> {
-                    ContentCheck.requireNonNull(id, w);
-                    String imagePath = imagePaths.uploadUrl(w);
+        ListenableFuture<ImagePathModel> addWishPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    Wish wish = wishRepository.findById(id).get();
+                    Assert.notNull(wish, "Could not find wish with id: " + id);
+
+                    String imagePath = imagePaths.uploadUrl(wish);
                     uploadImage(imagePath, image);
+
                     String fullImagePath = imagePaths.accessUrl(imagePath);
-                    w.getPictures().add(fullImagePath);
-                    wishRepository.save(w);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
-                },
-                e -> {
-                    // TODO
+                    wish.getPictures().add(fullImagePath);
+                    wishRepository.save(wish);
+
+                    return new ImagePathModel(id, wish.getPictures());
                 }
         );
 
+        submitImageJob(addWishPhotoJob, result);
         return result;
     }
 
@@ -147,43 +179,42 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        wishRepository.findById(id).addCallback(
-                w -> {
-                    ContentCheck.requireNonNull(id, w);
-                    String deleteUrl = imagePaths.deleteUrl(w, imagePath);
+        ListenableFuture<ImagePathModel> deleteWishPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    Wish wish = wishRepository.findById(id).get();
+                    Assert.notNull(wish, "Could not find wish with id: " + id);
 
-                    if (w.getPictures().contains(imagePath)) {
-                        w.getPictures().remove(imagePath);
+                    String deleteUrl = imagePaths.deleteUrl(wish, imagePath);
+                    if (wish.getPictures().contains(imagePath)) {
+                        wish.getPictures().remove(imagePath);
                         deleteImage(deleteUrl);
-                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, w.getPictures())));
+                        wishRepository.save(wish);
+                        return new ImagePathModel(id, wish.getPictures());
                     } else {
-                        result.setResult(ResponseEntity.badRequest().build());
+                        throw new IllegalArgumentException("Wish does not contain specified image");
                     }
-
-                    wishRepository.save(w);
-                },
-                e -> {
-                    // TODO
                 }
         );
 
+        submitImageJob(deleteWishPhotoJob, result);
         return result;
     }
+
+    // ======================================== Story ======================================== //
 
     @Override
     public DeferredResult<ResponseEntity<ImagePathModel>> getStoryPhotos(String id) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        storyRepository.findById(id).addCallback(
-                s -> {
-                    ContentCheck.requireNonNull(id, s);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
-                },
-                e -> {
-                    // TODO
+        ListenableFuture<ImagePathModel> getStoryPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    Story story = storyRepository.findById(id).get();
+                    Assert.notNull(story, "Could not find story with id: " + id);
+                    return new ImagePathModel(id, story.getPictures());
                 }
         );
 
+        submitImageJob(getStoryPhotoJob, result);
         return result;
     }
 
@@ -191,21 +222,23 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> addStoryPhoto(String id, MultipartFile image) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        storyRepository.findById(id).addCallback(
-                s -> {
-                    ContentCheck.requireNonNull(id, s);
-                    String imagePath = imagePaths.uploadUrl(s);
+        ListenableFuture<ImagePathModel> addStoryPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    Story story = storyRepository.findById(id).get();
+                    Assert.notNull(story, "Could not find story with id: " + id);
+
+                    String imagePath = imagePaths.uploadUrl(story);
                     uploadImage(imagePath, image);
+
                     String fullImagePath = imagePaths.accessUrl(imagePath);
-                    s.getPictures().add(fullImagePath);
-                    storyRepository.save(s);
-                    result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
-                },
-                e -> {
-                    // TODO
+                    story.getPictures().add(fullImagePath);
+                    storyRepository.save(story);
+
+                    return new ImagePathModel(id, story.getPictures());
                 }
         );
 
+        submitImageJob(addStoryPhotoJob, result);
         return result;
     }
 
@@ -213,27 +246,42 @@ public class AmazonS3ImageService implements ImageService {
     public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(String id, String imagePath) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
-        storyRepository.findById(id).addCallback(
-                s -> {
-                    ContentCheck.requireNonNull(id, s);
-                    String deleteUrl = imagePaths.deleteUrl(s, imagePath);
+        ListenableFuture<ImagePathModel> deleteStoryPhotoJob = listeningExecutorService.submit(
+                () -> {
+                    Story story = storyRepository.findById(id).get();
+                    Assert.notNull(story, "Could not find story with id: " + id);
 
-                    if (s.getPictures().contains(imagePath)) {
-                        s.getPictures().remove(imagePath);
+                    String deleteUrl = imagePaths.deleteUrl(story, imagePath);
+                    if (story.getPictures().contains(imagePath)) {
+                        story.getPictures().remove(imagePath);
                         deleteImage(deleteUrl);
-                        result.setResult(ResponseEntity.ok(new ImagePathModel(id, s.getPictures())));
+                        storyRepository.save(story);
+                        return new ImagePathModel(id, story.getPictures());
                     } else {
-                        result.setResult(ResponseEntity.badRequest().build());
+                        throw new IllegalArgumentException("Story does not contain specified image");
                     }
-
-                    storyRepository.save(s);
-                },
-                e -> {
-                    // TODO
                 }
         );
 
+        submitImageJob(deleteStoryPhotoJob, result);
         return result;
+    }
+
+    private void submitImageJob(ListenableFuture<ImagePathModel> job,
+                                DeferredResult<ResponseEntity<ImagePathModel>> result) {
+        Futures.addCallback(job, new FutureCallback<ImagePathModel>() {
+
+            @Override
+            public void onSuccess(ImagePathModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred during image manipulation", throwable);
+            }
+        });
     }
 
     private void uploadImage(String imagePath, MultipartFile image) {
