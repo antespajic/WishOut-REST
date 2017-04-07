@@ -643,8 +643,13 @@
         [
             {
                 "wish" :   {
-                    "wishId" : 1744,
-                    "userId" : 1980,
+                    "id" : "1744",
+                    "creator" : {
+                        "userId" : "1980",
+                        "firstName" : "Bill",
+                        "lastName" : "Kent",
+                        "profilePicture" : "profile/picture/url"
+                    },
                     "title" : "Wish title here",
                     "description" : "Wish description here",
                     "categories" : [ "travel", "music", "dancing" ],
@@ -653,14 +658,7 @@
                     "offerId" : null,
                     "state" : 1,
                     "upvoteCount" : 0,
-                    "reportCount" : 0
                 },
-                "creator" : {
-                    "userId" : 1980,
-                    "firstName" : "Bill",
-                    "lastName" : "Kent",
-                    "profilePicture" : "profile/picture/url"
-                }
             }
         ]
         ```
@@ -678,26 +676,24 @@
         [
             {
                 "story" : {
-                    "id" : 6731,
-                    "wishId" : 148842,
-                    "creatorId" : 15561,
-                    "sponsorId" : 27888,
+                    "id" : "6731da",
+                    "wishId" : "12sd312",
+                    "creator" : {
+                        "id" : "d112312d",
+                        "firstName" : "Jane",
+                        "lastName" : "Doe",
+                        "profilePicture" : "profile/picture/url"
+                    },
+                    "sponsor" : {
+                        "id" : "d2e2123",
+                        "firstName" : "John",
+                        "lastName" : "Doe",
+                        "profilePicture" : "profile/picture/url"
+                    }
                     "description" : "Story description here",
                     "created" : 1490117226,
                     "pictures" : [ "url/to/first/picture", "url/to/last/picture" ],
                     "reportCount" : 0
-                },
-                "creator" : {
-                    "userId" : 15561,
-                    "firstName" : "Jane",
-                    "lastName" : "Doe",
-                    "profilePicture" : "profile/picture/url"
-                },
-                "sponsor" : {
-                    "userId" : 27888,
-                    "firstName" : "John",
-                    "lastName" : "Doe",
-                    "profilePicture" : "profile/picture/url"
                 }
             }
         ]
@@ -717,8 +713,13 @@
         [
             {
                 "wish" :   {
-                    "wishId" : 1744,
-                    "userId" : 1980,
+                    "id" : "1744",
+                    "creator" : {
+                        "userId" : "1980",
+                        "firstName" : "Bill",
+                        "lastName" : "Kent",
+                        "profilePicture" : "profile/picture/url"
+                    },
                     "title" : "Wish title here",
                     "description" : "Wish description here",
                     "categories" : [ "travel", "music", "dancing" ],
@@ -727,18 +728,11 @@
                     "offerId" : null,
                     "state" : 1,
                     "upvoteCount" : 0,
-                    "reportCount" : 0
+                    "interaction" : {
+                        "upvoted" : false,
+                        "reported" : false
+                    }
                 },
-                "creator" : {
-                    "userId" : 1980,
-                    "firstName" : "Bill",
-                    "lastName" : "Kent",
-                    "profilePicture" : "profile/picture/url"
-                },
-                "interaction" : {
-                    "upvoted" : false,
-                    "reported" : false
-                }
             }
         ]
         ```
@@ -757,30 +751,28 @@
             [
                 {
                     "story" : {
-                        "id" : 6731,
-                        "wishId" : 148842,
-                        "creatorId" : 15561,
-                        "sponsorId" : 27888,
+                        "id" : "6731da",
+                        "wishId" : "12sd312",
+                        "creator" : {
+                            "id" : "d112312d",
+                            "firstName" : "Jane",
+                            "lastName" : "Doe",
+                            "profilePicture" : "profile/picture/url"
+                        },
+                        "sponsor" : {
+                            "id" : "d2e2123",
+                            "firstName" : "John",
+                            "lastName" : "Doe",
+                            "profilePicture" : "profile/picture/url"
+                        }
                         "description" : "Story description here",
                         "created" : 1490117226,
                         "pictures" : [ "url/to/first/picture", "url/to/last/picture" ],
-                        "reportCount" : 0
-                    },
-                    "creator" : {
-                        "userId" : 15561,
-                        "firstName" : "Jane",
-                        "lastName" : "Doe",
-                        "profilePicture" : "profile/picture/url"
-                    },
-                    "sponsor" : {
-                        "userId" : 27888,
-                        "firstName" : "John",
-                        "lastName" : "Doe",
-                        "profilePicture" : "profile/picture/url"
-                    },
-                    "interaction" : {
-                        "upvoted" : false,
-                        "reported" : false
+                        "reportCount" : 0,
+                        "interaction" : {
+                            "upvoted" : false,
+                            "reported" : false
+                        }
                     }
                 }
             ]
