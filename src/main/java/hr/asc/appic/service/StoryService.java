@@ -1,9 +1,17 @@
 package hr.asc.appic.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserLightViewModel;
@@ -17,12 +25,6 @@ import hr.asc.appic.persistence.repository.StoryRepository;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.DeferredResult;
 
 @Slf4j
 @Service
@@ -131,8 +133,12 @@ public class StoryService {
                     Assert.notNull(story, "Could not find story with id: " + id);
 
                     storyMapper.updatePojoFromModel(story, model);
-                    storyRepository.save(story);
-
+                    story = storyRepository.save(story).get();
+                    storyElasticRepository.save(storyMapper.toElasticModel(
+            				story,
+            				userMapper.lightModelFromUser(story.getCreator()),
+            				userMapper.lightModelFromUser(story.getSponsor()))
+            		);
                     return null;
                 }
         );

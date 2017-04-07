@@ -23,6 +23,7 @@ import lombok.Setter;
 public class StoryElasticModel {
 
 	@Id	private String id;
+	private String wishId;
 	private String description;
 	private List<String> pictures;
 	@Field(type = FieldType.Nested) private UserLightViewModel creator;

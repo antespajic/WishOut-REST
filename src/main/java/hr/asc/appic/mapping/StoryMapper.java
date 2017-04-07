@@ -62,6 +62,7 @@ public class StoryMapper implements Mapper<Story, StoryModel> {
                 .created(String.valueOf(story.getCreated().getTime()))
                 .description(story.getDescription())
                 .id(story.getId())
+                .wishId(story.getWish().getId())
                 .pictures(story.getPictures()).build();
     }
 }
