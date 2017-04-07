@@ -12,7 +12,7 @@ public interface ImageService {
 
     DeferredResult<ResponseEntity<ImagePathModel>> setUserPhoto(String id, MultipartFile image);
 
-    DeferredResult<ResponseEntity> deleteUserPhoto(String id, String imageName);
+    DeferredResult<ResponseEntity> deleteUserPhoto(String id);
 
     DeferredResult<ResponseEntity<ImagePathModel>> getWishPhotos(String id);
 

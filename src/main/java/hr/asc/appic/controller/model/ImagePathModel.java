@@ -1,13 +1,13 @@
 package hr.asc.appic.controller.model;
 
-import java.util.Collections;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +21,11 @@ public class ImagePathModel {
 
     public ImagePathModel(String id, String path) {
         this.id = id;
-        this.paths = Collections.singletonList(path);
+
+        if (path == null) {
+            paths = Collections.emptyList();
+        } else {
+            paths = Collections.singletonList(path);
+        }
     }
 }

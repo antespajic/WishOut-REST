@@ -29,10 +29,11 @@ public class ImagePaths {
         accessRoot = region + "." + url + "/" + bucket + "/";
     }
 
-
     public String accessUrl(String resourceUrl) {
         return accessRoot + resourceUrl;
     }
+
+    // ======================================== User ======================================== //
 
     public String uploadUrl(User u) {
         return userDir + "/" + u.getId() + "_" + new Date().getTime();
@@ -42,28 +43,42 @@ public class ImagePaths {
         if (u.getProfilePicture() != null) {
             return u.getProfilePicture().substring(accessRoot.length());
         }
-        throw new NullPointerException("Image for user is not present");
+        throw new IllegalArgumentException("Image for user is not present");
     }
+
+    // ======================================== Wish ======================================== //
 
     public String uploadUrl(Wish wish) {
         return wishDir + "/" + wish.getId() + "_" + new Date().getTime();
     }
 
-    public String deleteUrl(Wish wish, String imagePath) {
-        if (wish.getPictures().contains(imagePath)) {
-            return imagePath.substring(accessRoot.length());
+    public String accessUrl(Wish wish, String imageName) {
+        String fullImagePath = accessRoot + wishDir + "/" + imageName;
+        if (wish.getPictures().contains(fullImagePath)) {
+            return fullImagePath;
         }
-        throw new NullPointerException("Image for wish is not present");
+        throw new IllegalArgumentException("Image for wish is not present: " + imageName);
     }
+
+    public String deleteUrl(Wish wish, String imageName) {
+        return accessUrl(wish, imageName).substring(accessRoot.length());
+    }
+
+    // ======================================== Story ======================================== //
 
     public String uploadUrl(Story story) {
         return storyDir + "/" + story.getId() + "_" + new Date().getTime();
     }
 
-    public String deleteUrl(Story story, String imagePath) {
-        if (story.getPictures().contains(imagePath)) {
-            return imagePath.substring(accessRoot.length());
+    public String accessUrl(Story story, String imageName) {
+        String fullImagePath = accessRoot + storyDir + "/" + imageName;
+        if (story.getPictures().contains(fullImagePath)) {
+            return fullImagePath;
         }
-        throw new NullPointerException("Image for story is not present");
+        throw new IllegalArgumentException("Image for story is not present: " + imageName);
+    }
+
+    public String deleteUrl(Story story, String imageName) {
+        return accessUrl(story, imageName).substring(accessRoot.length());
     }
 }
