@@ -37,11 +37,6 @@ import java.nio.file.Files;
 @Service
 public class AmazonS3ImageService implements ImageService {
 
-    @Value("${aws-bucket-image}")
-    private String bucket;
-    @Autowired
-    private AmazonS3 client;
-
     @Autowired
     private ListeningExecutorService listeningExecutorService;
 
@@ -52,6 +47,10 @@ public class AmazonS3ImageService implements ImageService {
     @Autowired
     private StoryRepository storyRepository;
 
+    @Value("${aws-bucket-image}")
+    private String bucket;
+    @Autowired
+    private AmazonS3 client;
     @Autowired
     private ImagePaths imagePaths;
 
@@ -176,7 +175,7 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(String id, String imagePath) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteWishPhoto(String id, String imageName) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         ListenableFuture<ImagePathModel> deleteWishPhotoJob = listeningExecutorService.submit(
@@ -184,15 +183,14 @@ public class AmazonS3ImageService implements ImageService {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
 
-                    String deleteUrl = imagePaths.deleteUrl(wish, imagePath);
-                    if (wish.getPictures().contains(imagePath)) {
-                        wish.getPictures().remove(imagePath);
-                        deleteImage(deleteUrl);
-                        wishRepository.save(wish);
-                        return new ImagePathModel(id, wish.getPictures());
-                    } else {
-                        throw new IllegalArgumentException("Wish does not contain specified image");
-                    }
+                    String accessUrl = imagePaths.accessUrl(wish, imageName);
+                    String deleteUrl = imagePaths.deleteUrl(wish, imageName);
+
+                    wish.getPictures().remove(accessUrl);
+                    deleteImage(deleteUrl);
+
+                    wishRepository.save(wish);
+                    return new ImagePathModel(id, wish.getPictures());
                 }
         );
 
@@ -243,7 +241,7 @@ public class AmazonS3ImageService implements ImageService {
     }
 
     @Override
-    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(String id, String imagePath) {
+    public DeferredResult<ResponseEntity<ImagePathModel>> deleteStoryPhoto(String id, String imageName) {
         DeferredResult<ResponseEntity<ImagePathModel>> result = new DeferredResult<>();
 
         ListenableFuture<ImagePathModel> deleteStoryPhotoJob = listeningExecutorService.submit(
@@ -251,15 +249,14 @@ public class AmazonS3ImageService implements ImageService {
                     Story story = storyRepository.findById(id).get();
                     Assert.notNull(story, "Could not find story with id: " + id);
 
-                    String deleteUrl = imagePaths.deleteUrl(story, imagePath);
-                    if (story.getPictures().contains(imagePath)) {
-                        story.getPictures().remove(imagePath);
-                        deleteImage(deleteUrl);
-                        storyRepository.save(story);
-                        return new ImagePathModel(id, story.getPictures());
-                    } else {
-                        throw new IllegalArgumentException("Story does not contain specified image");
-                    }
+                    String accessUrl = imagePaths.accessUrl(story, imageName);
+                    String deleteUrl = imagePaths.deleteUrl(story, imageName);
+
+                    story.getPictures().remove(accessUrl);
+                    deleteImage(deleteUrl);
+
+                    storyRepository.save(story);
+                    return new ImagePathModel(id, story.getPictures());
                 }
         );
 

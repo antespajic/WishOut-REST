@@ -611,6 +611,7 @@
 * **Error response:** will be elaborated at a later time
 
 #### Image removal
+* **Note:** Image name parameter is not needed when removing user's profile picture.
 * **URL:** `/image/:resource/:id/:imageName`
 * **Method:** `DELETE`
 * **URL paramteres:** `resource = ['user','wish','story']`, `id = String`, `imageName = String`
