@@ -19,7 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(indexName="wish-index")
+@Document(indexName="wish-index", shards = 1, createIndex = true)
 public class WishElasticModel {
 
 	@Id private String id;

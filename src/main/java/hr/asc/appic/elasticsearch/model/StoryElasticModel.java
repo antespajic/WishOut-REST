@@ -19,7 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(indexName = "story-index")
+@Document(indexName = "story-index", shards = 1, createIndex = true)
 public class StoryElasticModel {
 
 	@Id	private String id;
