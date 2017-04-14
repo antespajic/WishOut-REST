@@ -1,3 +1,6 @@
+# WishOut REST API
+###### Version 1.0
+
 ## User functionality
 
 #### User creation
@@ -658,8 +661,8 @@
                     "created" : 1490117226,
                     "offerId" : null,
                     "state" : 1,
-                    "upvoteCount" : 0,
-                },
+                    "upvoteCount" : 0
+                }
             }
         ]
         ```
@@ -690,7 +693,7 @@
                         "firstName" : "John",
                         "lastName" : "Doe",
                         "profilePicture" : "profile/picture/url"
-                    }
+                    },
                     "description" : "Story description here",
                     "created" : 1490117226,
                     "pictures" : [ "url/to/first/picture", "url/to/last/picture" ],
@@ -733,7 +736,7 @@
                         "upvoted" : false,
                         "reported" : false
                     }
-                },
+                }
             }
         ]
         ```
@@ -765,7 +768,7 @@
                             "firstName" : "John",
                             "lastName" : "Doe",
                             "profilePicture" : "profile/picture/url"
-                        }
+                        },
                         "description" : "Story description here",
                         "created" : 1490117226,
                         "pictures" : [ "url/to/first/picture", "url/to/last/picture" ],
