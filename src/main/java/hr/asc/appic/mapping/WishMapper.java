@@ -58,10 +58,11 @@ public class WishMapper implements Mapper<Wish, WishModel> {
 
     public WishElasticModel toElasticModel(Wish wish, UserLightViewModel creator) {
         return WishElasticModel.builder()
+        		.id(wish.getId())
                 .creator(creator)
                 .created(String.valueOf(wish.getCreated().getTime()))
                 .categories(wish.getCategories())
-                .id(wish.getId())
+                .pictures(wish.getPictures())
                 .title(wish.getTitle())
                 .state(wish.getState())
                 .upvoteCount(wish.getUpvoteCount())

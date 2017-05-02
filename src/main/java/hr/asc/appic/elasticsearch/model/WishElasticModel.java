@@ -27,6 +27,7 @@ public class WishElasticModel {
 	private String title;
 	private String description;
 	private List<String> categories;
+	private List<String> pictures;
 	@Field(type = FieldType.Date) private String created;
 	private Integer upvoteCount;
 	private Integer state;
