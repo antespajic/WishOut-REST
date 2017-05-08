@@ -37,7 +37,9 @@ import java.nio.file.Files;
 @Service
 public class AmazonS3ImageService implements ImageService {
 
-    @Autowired
+    private static final String IMAGE_EXTENSION = ".png";
+
+	@Autowired
     private ListeningExecutorService listeningExecutorService;
 
     @Autowired
@@ -331,7 +333,7 @@ public class AmazonS3ImageService implements ImageService {
         try {
             File convertedFile = Files.createTempFile(
                     multipartFile.getOriginalFilename(),
-                    "-image"
+                    "-image" + IMAGE_EXTENSION
             ).toFile();
             FileOutputStream fos = new FileOutputStream(convertedFile);
             fos.write(multipartFile.getBytes());

@@ -5,6 +5,8 @@ import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.service.UserService;
+import hr.asc.appic.service.WishService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,18 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired private WishService wishService;
 
+    @RequestMapping(
+    		value = "/all",
+    		method = RequestMethod.GET,
+    		produces = MediaType.APPLICATION_JSON_VALUE
+	)
+    public DeferredResult<ResponseEntity<Collection<UserModel>>> getAllUsers() {
+    	return userService.getAllUsers();
+    }
+    
     @RequestMapping(
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -35,7 +48,16 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public DeferredResult<ResponseEntity<UserModel>> getUser(@PathVariable String id) {
-        return userService.getUser(id);
+        return userService.getUserById(id);
+    }
+    
+    @RequestMapping(
+    		value = "/email/{email}",
+    		method = RequestMethod.GET,
+    		produces = MediaType.APPLICATION_JSON_VALUE
+	)
+    public DeferredResult<ResponseEntity<UserModel>> getUserByEmail(@PathVariable String email) {
+    	return userService.getUserByEmail(email);
     }
 
     @RequestMapping(
@@ -71,7 +93,8 @@ public class UserController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public DeferredResult<ResponseEntity<Collection<OfferModel>>> getUserOffers(@PathVariable String id) {
-        return userService.getOffers(id);
+    public DeferredResult<ResponseEntity<Collection<WishModel>>> getUserOffers(@PathVariable String id) {
+    	// Returns wishes that user made an offer to
+    	return userService.getOffers(id);
     }
 }

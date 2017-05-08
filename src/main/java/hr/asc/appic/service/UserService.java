@@ -12,8 +12,10 @@ import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.mapping.StoryMapper;
 import hr.asc.appic.mapping.UserMapper;
 import hr.asc.appic.mapping.WishMapper;
+import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.repository.UserRepository;
+import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,7 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired private WishRepository wishRepository;
 
     @Autowired
     private UserMapper userMapper;
@@ -72,7 +75,7 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity<UserModel>> getUser(String id) {
+    public DeferredResult<ResponseEntity<UserModel>> getUserById(String id) {
         DeferredResult<ResponseEntity<UserModel>> result = new DeferredResult<>();
 
         ListenableFuture<UserModel> getUserJob = listeningExecutorService.submit(
@@ -192,24 +195,27 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity<Collection<OfferModel>>> getOffers(String id) {
-        DeferredResult<ResponseEntity<Collection<OfferModel>>> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<Collection<WishModel>>> getOffers(String id) {
+        DeferredResult<ResponseEntity<Collection<WishModel>>> result = new DeferredResult<>();
 
-        ListenableFuture<Collection<OfferModel>> getOffersJob = listeningExecutorService.submit(
+        ListenableFuture<Collection<WishModel>> getOffersJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
                     Assert.notNull(user, "Could not find user with id: " + id);
-                    return user.getOffers().stream()
-                            .sorted(Comparator.reverseOrder())
-                            .map(offerMapper::pojoToModel)
-                            .collect(Collectors.toList());
+//                    return user.getOffers().stream()
+//                            .sorted(Comparator.reverseOrder())
+//                            .map(offerMapper::pojoToModel)
+//                            .collect(Collectors.toList());
+                    
+                    return wishRepository.findByIdIn(user.getOffers().stream().map(Offer::getId).collect(Collectors.toSet()))
+                    	.stream().map(wishMapper::pojoToModel).collect(Collectors.toList());
                 }
         );
 
-        Futures.addCallback(getOffersJob, new FutureCallback<Collection<OfferModel>>() {
+        Futures.addCallback(getOffersJob, new FutureCallback<Collection<WishModel>>() {
 
             @Override
-            public void onSuccess(Collection<OfferModel> collection) {
+            public void onSuccess(Collection<WishModel> collection) {
                 result.setResult(ResponseEntity.ok(collection));
             }
 
@@ -222,4 +228,60 @@ public class UserService {
 
         return result;
     }
+
+	public DeferredResult<ResponseEntity<UserModel>> getUserByEmail(String email) {
+		DeferredResult<ResponseEntity<UserModel>> result = new DeferredResult<>();
+
+        ListenableFuture<UserModel> getUserJob = listeningExecutorService.submit(
+                () -> {
+                    User user = userRepository.findByEmail(email);
+                    Assert.notNull(user, "Could not find user with email: " + email);
+                    return userMapper.pojoToModel(user);
+                }
+        );
+
+        Futures.addCallback(getUserJob, new FutureCallback<UserModel>() {
+
+            @Override
+            public void onSuccess(UserModel model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while retrieving user object", t);
+            }
+        });
+
+        return result;
+	}
+
+	public DeferredResult<ResponseEntity<Collection<UserModel>>> getAllUsers() {
+		DeferredResult<ResponseEntity<Collection<UserModel>>> result = new DeferredResult<>();
+
+        ListenableFuture<Collection<UserModel>> getUserJob = listeningExecutorService.submit(
+                () -> {
+                    Collection<User> users = userRepository.findAll();
+                    return users.stream().map(userMapper::pojoToModel).collect(Collectors.toList());
+                }
+        );
+
+        Futures.addCallback(getUserJob, new FutureCallback<Collection<UserModel>>() {
+
+            @Override
+            public void onSuccess(Collection<UserModel> model) {
+                result.setResult(ResponseEntity.ok(model));
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while retrieving user object", t);
+            }
+        });
+
+        return result;
+	}
+
 }

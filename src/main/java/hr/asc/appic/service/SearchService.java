@@ -29,7 +29,7 @@ public class SearchService {
 		DeferredResult<ResponseEntity<Collection<WishElasticModel>>> res = new DeferredResult<>();
 		
 		List<WishElasticModel> searchResults = wishElasticRepository.search(
-				QueryBuilders.queryStringQuery(query).field("title").field("description"), 
+				QueryBuilders.queryStringQuery(query).field("title").field("description").field("categories"), 
 				new PageRequest(index, size)
 				).getContent();
 		

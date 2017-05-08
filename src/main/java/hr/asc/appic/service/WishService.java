@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
@@ -103,6 +104,7 @@ public class WishService {
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
+                    //TODO: calculate wish formula
                     return exportWish(wish, index, size);
                 }
         );
@@ -249,4 +251,16 @@ public class WishService {
         offer.setChosen(confirmed);
         offerRepository.save(offer);
     }
+
+	public DeferredResult<ResponseEntity<Collection<WishModel>>> getWishesWithOfferByUser(String id) {
+		DeferredResult<ResponseEntity<Collection<WishModel>>> result = new DeferredResult<>();
+		
+		ListenableFuture<Collection<WishModel>> getWishesWithOffer = listeningExecutorService.submit(
+				() -> {
+//					Collection<Wish> wishes = wishRepository.
+					return null;
+				});
+		
+		return result;
+	}
 }

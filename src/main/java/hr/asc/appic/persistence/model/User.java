@@ -21,7 +21,13 @@ import java.util.Set;
 @Accessors(chain = true)
 public class User {
 
-    @Id
+    public User(User user) {
+    	this.email = user.email;
+    	this.profileConfirmed = user.profileConfirmed;
+    	this.password = user.password;
+	}
+    
+	@Id
     private String id;
     private String email;
     private String password;
