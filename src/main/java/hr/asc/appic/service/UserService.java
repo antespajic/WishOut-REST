@@ -1,10 +1,22 @@
 package hr.asc.appic.service;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import hr.asc.appic.controller.model.OfferModel;
+
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.controller.model.WishModel;
@@ -17,16 +29,6 @@ import hr.asc.appic.persistence.model.User;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,13 +49,17 @@ public class UserService {
     private StoryMapper storyMapper;
     @Autowired
     private OfferMapper offerMapper;
+    
+    @Autowired private PasswordEncoder passwordEncoder;
 
     public DeferredResult<ResponseEntity<UserModel>> createUser(UserModel model) {
         DeferredResult<ResponseEntity<UserModel>> result = new DeferredResult<>();
 
         ListenableFuture<UserModel> createUserJob = listeningExecutorService.submit(
                 () -> {
-                    User user = userRepository.save(userMapper.modelToPojo(model)).get();
+                	User user = userMapper.modelToPojo(model);
+                	user.setPassword(passwordEncoder.encode(user.getPassword()));
+                    user = userRepository.save(user).get();
                     return userMapper.pojoToModel(user);
                 }
         );

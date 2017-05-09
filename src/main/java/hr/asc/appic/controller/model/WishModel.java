@@ -27,4 +27,5 @@ public class WishModel {
     private Integer state;
     private Integer upvoteCount;
     private Integer reportCount;
+    private Long timeLeft;
 }

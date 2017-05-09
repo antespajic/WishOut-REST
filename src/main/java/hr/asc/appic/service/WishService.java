@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 
@@ -104,7 +107,6 @@ public class WishService {
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     Assert.notNull(wish, "Could not find wish with id: " + id);
-                    //TODO: calculate wish formula
                     return exportWish(wish, index, size);
                 }
         );
@@ -204,7 +206,10 @@ public class WishService {
 
         WishExportModel wishExportModel = new WishExportModel();
         wishExportModel.setCreator(userMapper.lightModelFromUser(creator));
-        wishExportModel.setWish(wishMapper.pojoToModel(wish));
+        
+        WishModel wm = wishMapper.pojoToModel(wish);
+        calculateTimeLeftForWish(wm);
+        wishExportModel.setWish(wm);
 
         // Setting chosen offer, if such is present.
         if (chosenSize == 1) {
@@ -215,8 +220,8 @@ public class WishService {
             // In the future, interaction needs to be implemented.
         }
 
-        // In the future, myOffer needs to be implemented.
-        // In the future, interaction needs to be implemented.
+        // TODO: In the future, myOffer needs to be implemented.
+        // TODO: In the future, interaction needs to be implemented.
 
         for (Offer offer : allOffers) {
             User user = userRepository.findById(offer.getUserId()).get();
@@ -225,11 +230,21 @@ public class WishService {
             wishExportModel.getOffers().add(offerMapper.exportModelForUser(offer, user));
             // In the future, interaction needs to be implemented.
         }
-
+        
         return wishExportModel;
     }
 
-    private void updateOfferForWish(String wishId, String offerId, boolean confirmed) throws Exception {
+    private void calculateTimeLeftForWish(WishModel wm) {
+    	//vrijemeStvaranja(timestamp) + 3 dana - sadašnjeVrijeme(timestamp) + (brojUpvoteova*15minuta)
+    	
+    	LocalDateTime localDateTime = wm.getCreated().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    	
+    	localDateTime = localDateTime.plusDays(3).plusSeconds(wm.getUpvoteCount()*15*60);
+    	
+    	wm.setTimeLeft(ChronoUnit.SECONDS.between(LocalDateTime.now(), localDateTime));
+	}
+
+	private void updateOfferForWish(String wishId, String offerId, boolean confirmed) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
         Assert.notNull(wish, "Could not find wish with id: " + wishId);
 
