@@ -1,19 +1,22 @@
 package hr.asc.appic.controller;
 
-import hr.asc.appic.controller.model.OfferModel;
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.service.UserService;
 import hr.asc.appic.service.WishService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import java.util.Collection;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -52,7 +55,7 @@ public class UserController {
     }
     
     @RequestMapping(
-    		value = "/email/{email}",
+    		value = "/email/{email:.+}",
     		method = RequestMethod.GET,
     		produces = MediaType.APPLICATION_JSON_VALUE
 	)

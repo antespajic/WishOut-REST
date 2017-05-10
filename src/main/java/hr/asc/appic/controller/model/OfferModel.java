@@ -1,12 +1,12 @@
 package hr.asc.appic.controller.model;
 
+import java.util.Date;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 @Getter
 @Setter

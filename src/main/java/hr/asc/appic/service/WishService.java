@@ -1,9 +1,27 @@
 package hr.asc.appic.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import hr.asc.appic.controller.model.WishExportModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
@@ -17,22 +35,6 @@ import hr.asc.appic.persistence.repository.OfferRepository;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.DeferredResult;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.List;
 
 @Slf4j
 @Service

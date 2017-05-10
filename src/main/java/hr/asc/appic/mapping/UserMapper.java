@@ -1,10 +1,11 @@
 package hr.asc.appic.mapping;
 
+import org.springframework.stereotype.Service;
+
 import hr.asc.appic.controller.model.InteractionModel;
 import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.controller.model.UserModel;
 import hr.asc.appic.persistence.model.User;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserMapper implements Mapper<User, UserModel> {

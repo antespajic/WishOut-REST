@@ -1,9 +1,17 @@
 package hr.asc.appic.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+
 import hr.asc.appic.controller.model.OfferModel;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.persistence.model.Offer;
@@ -13,12 +21,6 @@ import hr.asc.appic.persistence.repository.OfferRepository;
 import hr.asc.appic.persistence.repository.UserRepository;
 import hr.asc.appic.persistence.repository.WishRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.DeferredResult;
 
 @Slf4j
 @Service

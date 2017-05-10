@@ -1,10 +1,11 @@
 package hr.asc.appic.mapping;
 
+import org.springframework.stereotype.Service;
+
 import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.elasticsearch.model.WishElasticModel;
 import hr.asc.appic.persistence.model.Wish;
-import org.springframework.stereotype.Service;
 
 @Service
 public class WishMapper implements Mapper<Wish, WishModel> {

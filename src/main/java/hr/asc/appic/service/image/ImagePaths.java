@@ -1,12 +1,13 @@
 package hr.asc.appic.service.image;
 
-import hr.asc.appic.persistence.model.Story;
-import hr.asc.appic.persistence.model.User;
-import hr.asc.appic.persistence.model.Wish;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import hr.asc.appic.persistence.model.Story;
+import hr.asc.appic.persistence.model.User;
+import hr.asc.appic.persistence.model.Wish;
 
 @Service
 public class ImagePaths {

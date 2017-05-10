@@ -1,11 +1,12 @@
 package hr.asc.appic.mapping;
 
+import org.springframework.stereotype.Service;
+
 import hr.asc.appic.controller.model.StoryExportModel;
 import hr.asc.appic.controller.model.StoryModel;
 import hr.asc.appic.controller.model.UserLightViewModel;
 import hr.asc.appic.elasticsearch.model.StoryElasticModel;
 import hr.asc.appic.persistence.model.Story;
-import org.springframework.stereotype.Service;
 
 @Service
 public class StoryMapper implements Mapper<Story, StoryModel> {

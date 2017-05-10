@@ -1,11 +1,12 @@
 package hr.asc.appic.mapping;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import hr.asc.appic.controller.model.OfferExportModel;
 import hr.asc.appic.controller.model.OfferModel;
 import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class OfferMapper implements Mapper<Offer, OfferModel> {

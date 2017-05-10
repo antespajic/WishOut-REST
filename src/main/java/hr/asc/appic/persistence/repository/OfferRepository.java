@@ -1,9 +1,10 @@
 package hr.asc.appic.persistence.repository;
 
-import hr.asc.appic.persistence.model.Offer;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import hr.asc.appic.persistence.model.Offer;
 
 public interface OfferRepository extends AsyncRepository<Offer> {
 
