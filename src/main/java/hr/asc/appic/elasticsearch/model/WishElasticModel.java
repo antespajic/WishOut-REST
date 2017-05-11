@@ -31,5 +31,6 @@ public class WishElasticModel {
 	@Field(type = FieldType.Date) private String created;
 	private Integer upvoteCount;
 	private Integer state;
+	private Long timeLeft;
 	
 }

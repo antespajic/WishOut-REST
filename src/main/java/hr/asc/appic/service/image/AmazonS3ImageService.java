@@ -26,6 +26,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 import hr.asc.appic.controller.model.ImagePathModel;
+import hr.asc.appic.elasticsearch.model.WishElasticModel;
+import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
 import hr.asc.appic.exception.ImageUploadException;
 import hr.asc.appic.persistence.model.Story;
 import hr.asc.appic.persistence.model.User;
@@ -50,6 +52,8 @@ public class AmazonS3ImageService implements ImageService {
     private WishRepository wishRepository;
     @Autowired
     private StoryRepository storyRepository;
+    @Autowired
+    private WishElasticRepository wishElasticRepository;
 
     @Value("${aws-bucket-image}")
     private String bucket;
@@ -161,6 +165,7 @@ public class AmazonS3ImageService implements ImageService {
         ListenableFuture<ImagePathModel> addWishPhotoJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
+                    WishElasticModel wem = wishElasticRepository.findOne(id);
                     Assert.notNull(wish, "Could not find wish with id: " + id);
 
                     String imagePath = imagePaths.uploadUrl(wish);
@@ -168,8 +173,11 @@ public class AmazonS3ImageService implements ImageService {
 
                     String fullImagePath = imagePaths.accessUrl(imagePath);
                     wish.getPictures().add(fullImagePath);
+                    wem.getPictures().add(fullImagePath);
+                    
                     wishRepository.save(wish);
-
+                    wishElasticRepository.save(wem);
+                    
                     return new ImagePathModel(id, wish.getPictures());
                 }
         );

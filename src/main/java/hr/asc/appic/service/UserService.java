@@ -149,6 +149,10 @@ public class UserService {
                     return user.getWishes().stream()
                             .sorted(Comparator.reverseOrder())
                             .map(wishMapper::pojoToModel)
+                            .map(wish -> {
+                            	wishMapper.calculateTimeLeftForWish(wish);
+                            	return wish;
+                            })
                             .collect(Collectors.toList());
                 }
         );
@@ -214,7 +218,10 @@ public class UserService {
 //                            .collect(Collectors.toList());
                     
                     return wishRepository.findByIdIn(user.getOffers().stream().map(Offer::getId).collect(Collectors.toSet()))
-                    	.stream().map(wishMapper::pojoToModel).collect(Collectors.toList());
+                    	.stream().map(wishMapper::pojoToModel).map(wish -> {
+                    		wishMapper.calculateTimeLeftForWish(wish);
+                    		return wish;
+                    	}).collect(Collectors.toList());
                 }
         );
 

@@ -1,5 +1,9 @@
 package hr.asc.appic.mapping;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.stereotype.Service;
 
 import hr.asc.appic.controller.model.UserLightViewModel;
@@ -69,4 +73,24 @@ public class WishMapper implements Mapper<Wish, WishModel> {
                 .upvoteCount(wish.getUpvoteCount())
                 .description(wish.getDescription()).build();
     }
+    
+    public void calculateTimeLeftForWish(WishElasticModel wm) {
+    	//vrijemeStvaranja(timestamp) + 3 dana - sadašnjeVrijeme(timestamp) + (brojUpvoteova*15minuta)
+    	
+    	LocalDateTime localDateTime = LocalDateTime.parse(wm.getCreated());
+    	
+    	localDateTime = localDateTime.plusDays(3).plusSeconds(wm.getUpvoteCount()*15*60);
+    	
+    	wm.setTimeLeft(ChronoUnit.SECONDS.between(LocalDateTime.now(), localDateTime));
+	}
+    
+    public void calculateTimeLeftForWish(WishModel wm) {
+    	//vrijemeStvaranja(timestamp) + 3 dana - sadašnjeVrijeme(timestamp) + (brojUpvoteova*15minuta)
+    	
+    	LocalDateTime localDateTime = wm.getCreated().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    	
+    	localDateTime = localDateTime.plusDays(3).plusSeconds(wm.getUpvoteCount()*15*60);
+    	
+    	wm.setTimeLeft(ChronoUnit.SECONDS.between(LocalDateTime.now(), localDateTime));
+	}
 }

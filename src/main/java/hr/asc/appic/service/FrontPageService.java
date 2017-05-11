@@ -15,6 +15,7 @@ import hr.asc.appic.elasticsearch.model.StoryElasticModel;
 import hr.asc.appic.elasticsearch.model.WishElasticModel;
 import hr.asc.appic.elasticsearch.repository.StoryElasticRepository;
 import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
+import hr.asc.appic.mapping.WishMapper;
 
 @Service
 public class FrontPageService {
@@ -23,6 +24,7 @@ public class FrontPageService {
 	
 	@Autowired private StoryElasticRepository storyRepository;
 	@Autowired private WishElasticRepository wishRepository;
+	@Autowired private WishMapper wishMapper;
 	
 	public DeferredResult<ResponseEntity<Collection<WishElasticModel>>> getWishes(WishRanking ranking, int index, int size) {
 		DeferredResult<ResponseEntity<Collection<WishElasticModel>>> res = new DeferredResult<>();
@@ -46,7 +48,7 @@ public class FrontPageService {
 		default:
 			wishes = Collections.emptyList();
 		}
-				
+		wishes.stream().forEach(wishMapper::calculateTimeLeftForWish);
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
 	}
@@ -60,6 +62,5 @@ public class FrontPageService {
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
 	}
-	
 	
 }

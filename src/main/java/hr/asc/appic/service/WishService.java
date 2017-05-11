@@ -210,7 +210,7 @@ public class WishService {
         wishExportModel.setCreator(userMapper.lightModelFromUser(creator));
         
         WishModel wm = wishMapper.pojoToModel(wish);
-        calculateTimeLeftForWish(wm);
+        wishMapper.calculateTimeLeftForWish(wm);
         wishExportModel.setWish(wm);
 
         // Setting chosen offer, if such is present.
@@ -235,16 +235,6 @@ public class WishService {
         
         return wishExportModel;
     }
-
-    private void calculateTimeLeftForWish(WishModel wm) {
-    	//vrijemeStvaranja(timestamp) + 3 dana - sadašnjeVrijeme(timestamp) + (brojUpvoteova*15minuta)
-    	
-    	LocalDateTime localDateTime = wm.getCreated().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-    	
-    	localDateTime = localDateTime.plusDays(3).plusSeconds(wm.getUpvoteCount()*15*60);
-    	
-    	wm.setTimeLeft(ChronoUnit.SECONDS.between(LocalDateTime.now(), localDateTime));
-	}
 
 	private void updateOfferForWish(String wishId, String offerId, boolean confirmed) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
