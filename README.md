@@ -1,5 +1,5 @@
 # WishOut REST API
-###### Version 1.0.1
+###### Version 1.0.2
 
 ## User functionality
 
@@ -385,6 +385,18 @@
     ```json
     [ "travel", "music", "dancing", "skiing" ]
     ```
+* **Success response:**
+    * **Code:** `200 OK`
+    * **Content:** not utilized here
+* **Error response:** will be elaborated at a later time
+
+#### Assigning offer to wish
+* **Note:** This functionality can be used to confirm new and decline existing offer for wish. Trying to assign
+offer to wish that already has confirmed offer assigned to it will result in error.
+* **URL:** `/wish/:wishId/:offerId?confirmed=:confirmed`
+* **Method:** `PUT`
+* **URL parameters:** `wishId = String`, `offerId = String`, `confirmed = Bool`
+* **Data parameters:** not utilized here
 * **Success response:**
     * **Code:** `200 OK`
     * **Content:** not utilized here
