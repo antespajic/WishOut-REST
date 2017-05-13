@@ -104,11 +104,16 @@ public class ReportService {
     @Transactional
     private void reportWish(String wishId) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
-        WishElasticModel elasticWish = wishElasticRepository.findOne(wishId);
+        WishElasticModel wem = wishElasticRepository.findOne(wishId);
+
         Assert.notNull(wish, "Report failed. Wish for id could not be found: " + wishId);
+        Assert.notNull(wem, "Report failed. Wish elastic model for id could not be found: " + wishId);
+
         wish.setReportCount(wish.getReportCount() + 1);
-        elasticWish.setReportCount(wish.getReportCount());
+        wem.setReportCount(wish.getReportCount());
+
         wishRepository.save(wish);
+        wishElasticRepository.save(wem);
     }
 
     @Transactional
@@ -122,10 +127,15 @@ public class ReportService {
     @Transactional
     private void reportStory(String storyId) throws Exception {
         Story story = storyRepository.findById(storyId).get();
-        StoryElasticModel elasticStory = storyElasticRepository.findOne(storyId);
+        StoryElasticModel sem = storyElasticRepository.findOne(storyId);
+
         Assert.notNull(story, "Report failed. Story for id could not be found: " + storyId);
+        Assert.notNull(sem, "Report failed. Story elastic model for id could not be found: " + storyId);
+
         story.setReportCount(story.getReportCount() + 1);
-        elasticStory.setReportCount(story.getReportCount());
+        sem.setReportCount(story.getReportCount());
+
         storyRepository.save(story);
+        storyElasticRepository.save(sem);
     }
 }
