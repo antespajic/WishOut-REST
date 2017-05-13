@@ -15,6 +15,8 @@ import hr.asc.appic.controller.model.WishExportModel;
 import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.service.WishService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/wish")
 public class WishController {
@@ -50,6 +52,16 @@ public class WishController {
     public DeferredResult<ResponseEntity> updateWish(@PathVariable("id") String id,
                                                      @RequestBody WishModel model) {
         return wishService.updateWish(id, model);
+    }
+
+    @RequestMapping(
+            value = "/categories/{id}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public DeferredResult<ResponseEntity> updateWishCategories(@PathVariable("id") String id,
+                                                               @RequestBody List<String> categories) {
+        return wishService.updateWishCategories(id, categories);
     }
 
     @RequestMapping(

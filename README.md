@@ -1,5 +1,5 @@
 # WishOut REST API
-###### Version 1.0
+###### Version 1.0.1
 
 ## User functionality
 
@@ -360,7 +360,6 @@
 * **Note:** In the following definition and example of wish update, wish is represented with whole JSON update object. However, wish update can be performed with partial JSON update object, where only fields which are provided will be updated. Following parameters of `Wish` object can be updated (all other parameters given throught JSON update object will be discarded, if they are present):
     * title
     * description
-    * categories
     * state
 * **URL:** `/wish/:id`
 * **Method:** `PUT`
@@ -370,9 +369,21 @@
     {
         "title" : "Another wish title here",
         "description" : "Another wish description here",
-        "categories" : [ "travel", "music", "dancing", "skiing" ],
         "state" : 2
     }
+    ```
+* **Success response:**
+    * **Code:** `200 OK`
+    * **Content:** not utilized here
+* **Error response:** will be elaborated at a later time
+
+#### Wish categories update
+* **URL:** `/wish/categories/:id`
+* **Method:** `PUT`
+* **URL parameters:** `id = String`
+* **Data parameters:**  
+    ```json
+    [ "travel", "music", "dancing", "skiing" ]
     ```
 * **Success response:**
     * **Code:** `200 OK`

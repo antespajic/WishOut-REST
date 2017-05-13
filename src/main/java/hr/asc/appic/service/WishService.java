@@ -164,6 +164,33 @@ public class WishService {
         return result;
     }
 
+    public DeferredResult<ResponseEntity> updateWishCategories(String id, List<String> categorises) {
+        DeferredResult<ResponseEntity> result = new DeferredResult<>();
+
+        ListenableFuture<Void> updateCategoriesJob = listeningExecutorService.submit(
+                () -> {
+                    Wish wish = wishRepository.findById(id).get();
+                    wish.setCategories(categorises);
+                    wishRepository.save(wish);
+                    return null;
+                }
+        );
+
+        Futures.addCallback(updateCategoriesJob, new FutureCallback<Void>() {
+
+            @Override
+            public void onSuccess(Void aVoid) { result.setResult(ResponseEntity.ok().build()); }
+
+            @Override
+            public void onFailure(Throwable t) {
+                result.setResult(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
+                log.error("Error occurred while updating wish categories.", t);
+            }
+        });
+
+        return result;
+    }
+
     public DeferredResult<ResponseEntity> updateOffer(String wishId, String offerId, boolean confirmed) {
         DeferredResult<ResponseEntity> result = new DeferredResult<>();
 

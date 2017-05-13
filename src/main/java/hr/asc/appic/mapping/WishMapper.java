@@ -55,9 +55,6 @@ public class WishMapper implements Mapper<Wish, WishModel> {
         if (model.getDescription() != null) {
             wish.setDescription(model.getDescription());
         }
-        if (model.getCategories() != null) {
-            wish.setCategories(model.getCategories());
-        }
         if (model.getState() != null) {
             wish.setState(model.getState());
         }
