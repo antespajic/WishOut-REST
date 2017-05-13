@@ -31,24 +31,25 @@ public class FrontPageService {
 		List<WishElasticModel> wishes;
 		switch(ranking) {
 		case NEW:
-			wishes = wishRepository.findAll(
-					new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created")))
-			.getContent();
+			wishes = wishRepository.findByState(0,
+					new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created"))
+            ).getContent();
 			break;
 		case TOP:
-			wishes = wishRepository.findAll(
-					new PageRequest(index, size, new Sort(Sort.Direction.DESC, "upvoteCount")))
-			.getContent();
+			wishes = wishRepository.findByState(0,
+					new PageRequest(index, size, new Sort(Sort.Direction.DESC, "upvoteCount"))
+            ).getContent();
 			break;
 		case PENDING:
-			wishes = wishRepository.findByState(
-					1, new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created")))
-					.getContent();
+			wishes = wishRepository.findByState(1,
+                    new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created"))
+            ).getContent();
 			break;
 		default:
 			wishes = Collections.emptyList();
 		}
-		wishes.stream().forEach(wishMapper::calculateTimeLeftForWish);
+
+		wishes.forEach(wishMapper::calculateTimeLeftForWish);
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
 	}
@@ -57,10 +58,9 @@ public class FrontPageService {
 		DeferredResult<ResponseEntity<Collection<StoryElasticModel>>> res = new DeferredResult<>();
 		List<StoryElasticModel> wishes =
 				storyRepository.findAll(
-						new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created")))
-				.getContent();
+						new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created"))
+                ).getContent();
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
 	}
-	
 }
