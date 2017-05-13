@@ -212,13 +212,13 @@ public class UserService {
                 () -> {
                     User user = userRepository.findById(id).get();
                     Assert.notNull(user, "Could not find user with id: " + id);
-//                    return user.getOffers().stream()
-//                            .sorted(Comparator.reverseOrder())
-//                            .map(offerMapper::pojoToModel)
-//                            .collect(Collectors.toList());
                     
-                    return wishRepository.findByIdIn(user.getOffers().stream().map(Offer::getId).collect(Collectors.toSet()))
-                    	.stream().map(wishMapper::pojoToModel).map(wish -> {
+                    return wishRepository.findByIdIn(
+                    			user.getOffers().stream().map(Offer::getWishId).collect(Collectors.toSet())
+                    		)
+                    	.stream()
+                    	.map(wishMapper::pojoToModel)
+                    	.map(wish -> {
                     		wishMapper.calculateTimeLeftForWish(wish);
                     		return wish;
                     	}).collect(Collectors.toList());

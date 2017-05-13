@@ -29,5 +29,6 @@ public class StoryElasticModel {
 	@Field(type = FieldType.Nested) private UserLightViewModel creator;
 	@Field(type = FieldType.Nested) private UserLightViewModel sponsor;
 	@Field(type = FieldType.Date) private String created;
+	private Integer reportCount;
 
 }

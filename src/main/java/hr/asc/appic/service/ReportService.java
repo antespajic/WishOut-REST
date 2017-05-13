@@ -13,6 +13,10 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import hr.asc.appic.elasticsearch.model.StoryElasticModel;
+import hr.asc.appic.elasticsearch.model.WishElasticModel;
+import hr.asc.appic.elasticsearch.repository.StoryElasticRepository;
+import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
 import hr.asc.appic.persistence.model.Offer;
 import hr.asc.appic.persistence.model.Story;
 import hr.asc.appic.persistence.model.User;
@@ -39,6 +43,9 @@ public class ReportService {
     private OfferRepository offerRepository;
     @Autowired
     private StoryRepository storyRepository;
+    
+    @Autowired private WishElasticRepository wishElasticRepository;
+    @Autowired private StoryElasticRepository storyElasticRepository;
 
     public DeferredResult<ResponseEntity<?>> report(ContentOrigin origin,
                                                  String resourceId,
@@ -97,8 +104,10 @@ public class ReportService {
     @Transactional
     private void reportWish(String wishId) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
+        WishElasticModel elasticWish = wishElasticRepository.findOne(wishId);
         Assert.notNull(wish, "Report failed. Wish for id could not be found: " + wishId);
         wish.setReportCount(wish.getReportCount() + 1);
+        elasticWish.setReportCount(wish.getReportCount());
         wishRepository.save(wish);
     }
 
@@ -113,8 +122,10 @@ public class ReportService {
     @Transactional
     private void reportStory(String storyId) throws Exception {
         Story story = storyRepository.findById(storyId).get();
+        StoryElasticModel elasticStory = storyElasticRepository.findOne(storyId);
         Assert.notNull(story, "Report failed. Story for id could not be found: " + storyId);
         story.setReportCount(story.getReportCount() + 1);
+        elasticStory.setReportCount(story.getReportCount());
         storyRepository.save(story);
     }
 }
