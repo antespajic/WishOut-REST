@@ -1,5 +1,7 @@
 package hr.asc.appic.service;
 
+import hr.asc.appic.elasticsearch.model.WishElasticModel;
+import hr.asc.appic.elasticsearch.repository.WishElasticRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,9 @@ public class UpvoteService {
     private WishRepository wishRepository;
     @Autowired
     private OfferRepository offerRepository;
+
+    @Autowired
+    private WishElasticRepository wishElasticRepository;
 
     public DeferredResult<ResponseEntity<?>> upvote(ContentOrigin origin,
                                                  String resourceId,
@@ -89,9 +94,18 @@ public class UpvoteService {
     @Transactional
     private void upvoteWish(String wishId) throws Exception {
         Wish wish = wishRepository.findById(wishId).get();
+        WishElasticModel wem = wishElasticRepository.findOne(wishId);
+
         Assert.notNull(wish, "Upvote failed. Wish for id could not be found: " + wishId);
-        wish.setUpvoteCount(wish.getUpvoteCount() + 1);
+        Assert.notNull(wem, "Upvote failed. Wish elastic model for id could not be found: " + wishId);
+
+        int upvoteCount = wish.getUpvoteCount() + 1;
+
+        wish.setUpvoteCount(upvoteCount);
+        wem.setUpvoteCount(upvoteCount);
+
         wishRepository.save(wish);
+        wishElasticRepository.save(wem);
     }
 
     @Transactional
