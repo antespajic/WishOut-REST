@@ -42,7 +42,7 @@ public class FrontPageService {
 			break;
 		case PENDING:
 			wishes = wishRepository.findByState(
-					0, new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created")))
+					1, new PageRequest(index, size, new Sort(Sort.Direction.DESC, "created")))
 					.getContent();
 			break;
 		default:
