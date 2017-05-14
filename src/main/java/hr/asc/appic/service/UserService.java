@@ -1,9 +1,13 @@
 package hr.asc.appic.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import hr.asc.appic.controller.model.*;
+import hr.asc.appic.persistence.model.Story;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +21,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import hr.asc.appic.controller.model.StoryModel;
-import hr.asc.appic.controller.model.UserModel;
-import hr.asc.appic.controller.model.WishModel;
 import hr.asc.appic.mapping.OfferMapper;
 import hr.asc.appic.mapping.StoryMapper;
 import hr.asc.appic.mapping.UserMapper;
@@ -139,13 +140,16 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity<Collection<WishModel>>> getWishes(String id) {
-        DeferredResult<ResponseEntity<Collection<WishModel>>> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<Collection<WishExportModel>>> getWishes(String id) {
+        DeferredResult<ResponseEntity<Collection<WishExportModel>>> result = new DeferredResult<>();
 
-        ListenableFuture<Collection<WishModel>> getWishesJob = listeningExecutorService.submit(
+        ListenableFuture<Collection<WishExportModel>> getWishesJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
                     Assert.notNull(user, "Could not find user with id: " + id);
+
+                    UserLightViewModel userLite = userMapper.lightModelFromUser(user);
+
                     return user.getWishes().stream()
                             .sorted(Comparator.reverseOrder())
                             .map(wishMapper::pojoToModel)
@@ -153,14 +157,20 @@ public class UserService {
                             	wishMapper.calculateTimeLeftForWish(wish);
                             	return wish;
                             })
+                            .map(wish -> {
+                                WishExportModel wem = new WishExportModel();
+                                wem.setWish(wish);
+                                wem.setCreator(userLite);
+                                return wem;
+                            })
                             .collect(Collectors.toList());
                 }
         );
 
-        Futures.addCallback(getWishesJob, new FutureCallback<Collection<WishModel>>() {
+        Futures.addCallback(getWishesJob, new FutureCallback<Collection<WishExportModel>>() {
 
             @Override
-            public void onSuccess(Collection<WishModel> collection) {
+            public void onSuccess(Collection<WishExportModel> collection) {
                 result.setResult(ResponseEntity.ok(collection));
             }
 
@@ -174,24 +184,34 @@ public class UserService {
         return result;
     }
 
-    public DeferredResult<ResponseEntity<Collection<StoryModel>>> getStories(String id) {
-        DeferredResult<ResponseEntity<Collection<StoryModel>>> result = new DeferredResult<>();
+    public DeferredResult<ResponseEntity<Collection<StoryExportModel>>> getStories(String id) {
+        DeferredResult<ResponseEntity<Collection<StoryExportModel>>> result = new DeferredResult<>();
 
-        ListenableFuture<Collection<StoryModel>> getStoriesJob = listeningExecutorService.submit(
+        ListenableFuture<Collection<StoryExportModel>> getStoriesJob = listeningExecutorService.submit(
                 () -> {
                     User user = userRepository.findById(id).get();
                     Assert.notNull(user, "Could not find user with id: " + id);
-                    return user.getStories().stream()
+
+                    List<StoryExportModel> sem = new ArrayList<>();
+
+                    for (Story story : user.getStories()) {
+                        UserLightViewModel creator = userMapper.lightModelFromUser(story.getCreator());
+                        UserLightViewModel sponsor = userMapper.lightModelFromUser(story.getSponsor());
+                        StoryModel storyModel = storyMapper.pojoToModel(story);
+
+                        sem.add(storyMapper.pojoToExportModel(storyModel, creator, sponsor));
+                    }
+
+                    return sem.stream()
                             .sorted(Comparator.reverseOrder())
-                            .map(storyMapper::pojoToModel)
                             .collect(Collectors.toList());
                 }
         );
 
-        Futures.addCallback(getStoriesJob, new FutureCallback<Collection<StoryModel>>() {
+        Futures.addCallback(getStoriesJob, new FutureCallback<Collection<StoryExportModel>>() {
 
             @Override
-            public void onSuccess(Collection<StoryModel> collection) {
+            public void onSuccess(Collection<StoryExportModel> collection) {
                 result.setResult(ResponseEntity.ok(collection));
             }
 

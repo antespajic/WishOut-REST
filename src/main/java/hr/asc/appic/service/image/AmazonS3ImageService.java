@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import hr.asc.appic.elasticsearch.model.StoryElasticModel;
+import hr.asc.appic.elasticsearch.repository.StoryElasticRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -52,8 +54,11 @@ public class AmazonS3ImageService implements ImageService {
     private WishRepository wishRepository;
     @Autowired
     private StoryRepository storyRepository;
+
     @Autowired
     private WishElasticRepository wishElasticRepository;
+    @Autowired
+    private StoryElasticRepository storyElasticRepository;
 
     @Value("${aws-bucket-image}")
     private String bucket;
@@ -166,12 +171,15 @@ public class AmazonS3ImageService implements ImageService {
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
                     WishElasticModel wem = wishElasticRepository.findOne(id);
+
                     Assert.notNull(wish, "Could not find wish with id: " + id);
+                    Assert.notNull(wem, "Could not find wish elastic model with id: " + id);
 
                     String imagePath = imagePaths.uploadUrl(wish);
                     uploadImage(imagePath, image);
 
                     String fullImagePath = imagePaths.accessUrl(imagePath);
+
                     wish.getPictures().add(fullImagePath);
                     wem.getPictures().add(fullImagePath);
                     
@@ -193,15 +201,22 @@ public class AmazonS3ImageService implements ImageService {
         ListenableFuture<ImagePathModel> deleteWishPhotoJob = listeningExecutorService.submit(
                 () -> {
                     Wish wish = wishRepository.findById(id).get();
+                    WishElasticModel wem = wishElasticRepository.findOne(id);
+
                     Assert.notNull(wish, "Could not find wish with id: " + id);
+                    Assert.notNull(wem, "Could not find wish elastic model with id: " + id);
 
                     String accessUrl = imagePaths.accessUrl(wish, imageName);
                     String deleteUrl = imagePaths.deleteUrl(wish, imageName);
 
                     wish.getPictures().remove(accessUrl);
+                    wem.getPictures().remove(accessUrl);
+
                     deleteImage(deleteUrl);
 
                     wishRepository.save(wish);
+                    wishElasticRepository.save(wem);
+
                     return new ImagePathModel(id, wish.getPictures());
                 }
         );
@@ -235,14 +250,21 @@ public class AmazonS3ImageService implements ImageService {
         ListenableFuture<ImagePathModel> addStoryPhotoJob = listeningExecutorService.submit(
                 () -> {
                     Story story = storyRepository.findById(id).get();
+                    StoryElasticModel sem = storyElasticRepository.findOne(id);
+
                     Assert.notNull(story, "Could not find story with id: " + id);
+                    Assert.notNull(sem, "Could not find story elastic model with id: " + id);
 
                     String imagePath = imagePaths.uploadUrl(story);
                     uploadImage(imagePath, image);
 
                     String fullImagePath = imagePaths.accessUrl(imagePath);
+
                     story.getPictures().add(fullImagePath);
+                    sem.getPictures().add(fullImagePath);
+
                     storyRepository.save(story);
+                    storyElasticRepository.save(sem);
 
                     return new ImagePathModel(id, story.getPictures());
                 }
@@ -259,15 +281,22 @@ public class AmazonS3ImageService implements ImageService {
         ListenableFuture<ImagePathModel> deleteStoryPhotoJob = listeningExecutorService.submit(
                 () -> {
                     Story story = storyRepository.findById(id).get();
+                    StoryElasticModel sem = storyElasticRepository.findOne(id);
+
                     Assert.notNull(story, "Could not find story with id: " + id);
+                    Assert.notNull(sem, "Could not find story elastic model with id: " + id);
 
                     String accessUrl = imagePaths.accessUrl(story, imageName);
                     String deleteUrl = imagePaths.deleteUrl(story, imageName);
 
                     story.getPictures().remove(accessUrl);
+                    sem.getPictures().remove(accessUrl);
+
                     deleteImage(deleteUrl);
 
                     storyRepository.save(story);
+                    storyElasticRepository.save(sem);
+
                     return new ImagePathModel(id, story.getPictures());
                 }
         );

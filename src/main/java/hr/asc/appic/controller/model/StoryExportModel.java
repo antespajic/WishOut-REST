@@ -9,10 +9,15 @@ import lombok.experimental.Accessors;
 @Setter
 @NoArgsConstructor
 @Accessors(chain = true)
-public class StoryExportModel {
+public class StoryExportModel implements Comparable<StoryExportModel> {
 
     private StoryModel story;
     private UserLightViewModel creator;
     private UserLightViewModel sponsor;
     private InteractionModel interaction;
+
+    @Override
+    public int compareTo(StoryExportModel o) {
+        return story.getCreated().compareTo(o.getStory().getCreated());
+    }
 }
