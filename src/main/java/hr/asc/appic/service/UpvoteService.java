@@ -99,10 +99,8 @@ public class UpvoteService {
         Assert.notNull(wish, "Upvote failed. Wish for id could not be found: " + wishId);
         Assert.notNull(wem, "Upvote failed. Wish elastic model for id could not be found: " + wishId);
 
-        int upvoteCount = wish.getUpvoteCount() + 1;
-
-        wish.setUpvoteCount(upvoteCount);
-        wem.setUpvoteCount(upvoteCount);
+        wish.setUpvoteCount(wish.getUpvoteCount() + 1);
+        wem.setUpvoteCount(wish.getUpvoteCount());
 
         wishRepository.save(wish);
         wishElasticRepository.save(wem);
