@@ -47,6 +47,12 @@ public class FrontPageController {
 		return frontPageService.getStories(index, size);
 	}
 
+	@RequestMapping(method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity deleteElastic() {
+		frontPageService.deleteAll();
+		return ResponseEntity.ok().build();
+	}
+	
 	private WishRanking parseRankingString(String ranking) {
 		switch(ranking.toLowerCase()){
 		case "new":

@@ -48,7 +48,6 @@ public class FrontPageService {
 		default:
 			wishes = Collections.emptyList();
 		}
-
 		wishes.forEach(wishMapper::calculateTimeLeftForWish);
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
@@ -62,5 +61,12 @@ public class FrontPageService {
                 ).getContent();
 		res.setResult(ResponseEntity.ok(wishes));
 		return res;
+	}
+	
+	public void deleteAll() {
+		
+		wishRepository.deleteAll();
+		storyRepository.deleteAll();
+	
 	}
 }
