@@ -15,7 +15,7 @@ public class ElasticSearchConfiguration {
 
 	@Bean
 	public JestClient jestClient() {
-		String connectionUrl = "https://9wsqhj425m:nb88u3md0l@wishout-staging-9440164663.eu-west-1.bonsaisearch.net";
+		String connectionUrl = "";
 		JestClientFactory factory = new JestClientFactory();
 		factory.setHttpClientConfig(new HttpClientConfig
 		       .Builder(connectionUrl)
